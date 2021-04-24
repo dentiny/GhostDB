@@ -1,0 +1,39 @@
+//===----------------------------------------------------------------------===//
+//
+//                         GhostDB
+//
+// db.h
+//
+// Identification: src/db.h
+//
+// Copyright (c) 2021
+//
+//===----------------------------------------------------------------------===//
+
+#pragma once
+
+#include <cstdint>
+#include <vector>
+
+#include "buffer.h"
+#include "config.h"
+#include "level.h"
+#include "logger.h"
+
+namespace ghostdb {
+
+class GhostDB {
+ public:
+  static bool Open(const char *path, GhostDB **db);
+  bool Put(int32_t key, int32_t val);
+  bool Get(int32_t key, int32_t *val);
+  bool Delete(int32_t key);
+  GhostDB();
+  ~GhostDB() noexcept;
+
+ private:
+  Buffer *buffer_;
+  std::vector<Level*> levels_;
+};
+
+}  // namespace ghostdb
