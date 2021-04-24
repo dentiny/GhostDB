@@ -260,3 +260,7 @@ docs/dev
 
 # Vagrant
 .vagrant
+
+# Executable
+src/testdb
+src/*.o
