@@ -262,7 +262,7 @@ docs/dev
 .vagrant
 
 # Executable
-src/testdb
+src/test_db
 src/*.o
 
 # Memtable WAL and SSTable
