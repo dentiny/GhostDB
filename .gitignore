@@ -264,3 +264,7 @@ docs/dev
 # Executable
 src/testdb
 src/*.o
+
+# Memtable WAL and SSTable
+src/*.log
+src/*.db

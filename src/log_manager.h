@@ -2,9 +2,9 @@
 //
 //                         GhostDB
 //
-// buffer.h
+// log_manager.h
 //
-// Identification: src/buffer.h
+// Identification: src/log_manager.h
 //
 // Copyright (c) 2021
 //
@@ -12,28 +12,25 @@
 
 #pragma once
 
-#include <cstdint>
-#include <map>
 #include <memory>
 
 #include "config.h"
 #include "disk_manager.h"
-#include "logger.h"
 
 namespace ghostdb {
 
-class Buffer {
+class LogManager {
  public:
-  Buffer(uint32_t buffer_size);
-  bool Put(int32_t key, int32_t val);
-  bool Get(int32_t key, int32_t *val);
-  bool Delete(int32_t key);
+  LogManager(int level, int run);
+  ~LogManager() noexcept;
+  void RunFlushThread();
+  void StopFlushThread();
+  void AppendLogRecord();
 
  private:
-  uint32_t buffer_size_;
-  std::map<int32_t, int32_t> kv_;
-  /** memtable WAL */
   std::unique_ptr<DiskManager> disk_manager_;
+  char *log_buffer_;
+  char *flush_buffer_;
 };
 
-}  // namespace ghostdb
+}

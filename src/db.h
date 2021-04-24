@@ -20,6 +20,7 @@
 #include "config.h"
 #include "level.h"
 #include "logger.h"
+#include "log_manager.h"
 
 namespace ghostdb {
 
@@ -35,6 +36,7 @@ class GhostDB {
  private:
   std::unique_ptr<Buffer> buffer_;
   std::vector<Level*> levels_;
+  std::unique_ptr<LogManager> log_manager_;
 };
 
 }  // namespace ghostdb
