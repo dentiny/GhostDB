@@ -13,6 +13,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #include "buffer.h"
@@ -32,7 +33,7 @@ class GhostDB {
   ~GhostDB() noexcept;
 
  private:
-  Buffer *buffer_;
+  std::unique_ptr<Buffer> buffer_;
   std::vector<Level*> levels_;
 };
 

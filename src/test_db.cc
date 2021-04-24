@@ -24,7 +24,9 @@ void SingleThreadTest() {
   assert(db->Put(1, 2));
   int32_t val;
   assert(db->Get(1, &val));
+  assert(val == 2);
   assert(db->Delete(1));
+  assert(!db->Get(1, &val));
   delete db;
 }
 
