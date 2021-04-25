@@ -16,6 +16,7 @@
 #include <fstream>
 #include <string>
 
+#include "config.h"
 #include "logger.h"
 
 namespace ghostdb {
@@ -33,4 +34,4 @@ class DiskManager {
   std::fstream db_io_;  // SSTable
 };
 
-}  // ghostdb
+}  // namespace ghostdb

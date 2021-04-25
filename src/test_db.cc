@@ -13,21 +13,23 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 
 #include "db.h"
+
+using std::make_unique;
+using std::unique_ptr;
 
 namespace ghostdb {
 
 void SingleThreadTest() {
-  GhostDB *db = new GhostDB();
-  assert(GhostDB::Open("/home/hj110/test.db", &db));
+  unique_ptr<GhostDB> db = make_unique<GhostDB>();
   assert(db->Put(1, 2));
   int32_t val;
   assert(db->Get(1, &val));
   assert(val == 2);
   assert(db->Delete(1));
   assert(!db->Get(1, &val));
-  delete db;
 }
 
 }  // namespace ghostdb

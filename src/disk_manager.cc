@@ -13,11 +13,14 @@
 #include <cassert>
 
 #include "disk_manager.h"
+#include "string_util.h"
+
+using std::string;
 
 namespace ghostdb {
 
 DiskManager::DiskManager() {
-  std::string log_file("memtable.log");
+  string log_file = StringConcat(db_base, "memtable.log");
   log_io_.open(log_file, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
   // directory or file does not exist
   if (!log_io_.is_open()) {
@@ -35,8 +38,8 @@ DiskManager::DiskManager() {
 
 DiskManager::DiskManager(int level, int run) {
   char filename[25] = { 0 };
-  snprintf(filename, 25, "level_%d_run_%d.db", level, run);
-  std::string db_file = std::string(filename);
+  snprintf(filename, sizeof(filename), "level_%d_run_%d.db", level, run);
+  string db_file = StringConcat(db_base, filename);
   db_io_.open(db_file, std::ios::binary | std::ios::in | std::ios::out);
   // directory or file does not exist
   if (!db_io_.is_open()) {

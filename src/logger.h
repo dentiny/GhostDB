@@ -12,10 +12,10 @@
 
 #pragma once
 
-#define LOG_DEBUG(msg) \
-  Logger::Debug(__FILE__, __LINE__, msg)
-#define LOG_ERROR(msg) \
-  Logger::Error(__FILE__, __LINE__, msg)
+#define LOG_DEBUG(...) \
+  Logger::Debug(__FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...) \
+  Logger::Error(__FILE__, __LINE__, __VA_ARGS__)
 
 #include <cstdlib>
 #include <iostream>
@@ -25,22 +25,29 @@ namespace ghostdb {
 
 class Logger {
  public:
-  static void Debug(const char *filename, int line, const char *msg) {
-    std::cout << filename << ":" << line << " " << msg << std::endl;
+  template<typename ... Args>
+  static void Debug(const char *filename, int line, Args ... args) {
+    std::cerr << filename << ":" << line << " ";
+    Impl(args...);
   }
 
-  static void Debug(const char *filename, int line, const std::string& msg) {
-    std::cout << filename << ":" << line << " " << msg << std::endl;
-  }
-
-  static void Error(const char *filename, int line, const char *msg) {
-    std::cout << filename << ":" << line << " " << msg << std::endl;
+  template<typename ... Args>
+  static void Error(const char *filename, int line, Args ... args) {
+    std::cerr << filename << ":" << line << " ";
+    Impl(args...);
     exit(EXIT_FAILURE);
   }
 
-  static void Error(const char *filename, int line, const std::string& msg) {
-    std::cout << filename << ":" << line << " " << msg << std::endl;
-    exit(EXIT_FAILURE);
+ private:
+  template<typename T>
+  static void Impl(T arg) {
+    std::cerr << arg << std::endl;
+  }
+
+  template<typename T, typename ... Args>
+  static void Impl(T arg, Args ... args) {
+    std::cerr << arg;
+    Impl(args...);
   }
 };
 

@@ -13,10 +13,10 @@
 #pragma once
 
 #include <atomic>
-#include <condition_variable>
-#include <future>
+#include <condition_variable>  // NOLINT
+#include <future>  // NOLINT
 #include <memory>
-#include <mutex>
+#include <mutex>  // NOLINT
 
 #include "config.h"
 #include "disk_manager.h"
@@ -49,4 +49,4 @@ class LogManager {
   std::future<void> flush_future_;
 };
 
-}
+}  // namespace ghostdb

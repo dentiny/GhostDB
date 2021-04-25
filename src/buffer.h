@@ -24,10 +24,9 @@ namespace ghostdb {
 
 class Buffer {
  public:
-  Buffer(uint32_t buffer_size);
+  explicit Buffer(uint32_t buffer_size);
   bool Put(int32_t key, int32_t val);
-  bool Get(int32_t key, int32_t *val);
-  bool Delete(int32_t key);
+  bool Get(int32_t key, int32_t **val);
 
  private:
   uint32_t buffer_size_;

@@ -26,16 +26,15 @@ namespace ghostdb {
 
 class GhostDB {
  public:
-  static bool Open(const char *path, GhostDB **db);
+  GhostDB();
+  ~GhostDB() noexcept;
   bool Put(int32_t key, int32_t val);
   bool Get(int32_t key, int32_t *val);
   bool Delete(int32_t key);
-  GhostDB();
-  ~GhostDB() noexcept;
 
  private:
   std::unique_ptr<Buffer> buffer_;
-  std::vector<Level*> levels_;
+  std::vector<std::unique_ptr<Level*>> levels_;
   std::unique_ptr<LogManager> log_manager_;
 };
 
