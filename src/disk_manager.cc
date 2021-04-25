@@ -10,6 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <cassert>
+
 #include "disk_manager.h"
 
 namespace ghostdb {
@@ -48,6 +50,35 @@ DiskManager::DiskManager(int level, int run) {
       LOG_ERROR("cannot open db file");
     }
   }
+}
+
+DiskManager::~DiskManager() {
+  if (log_io_.is_open()) {
+    log_io_.close();
+  }
+  if (db_io_.is_open()) {
+    db_io_.close();
+  }
+}
+
+void DiskManager::WriteLog(char *log_data, int size) {
+  assert(log_data != nullptr);
+  if (size == 0) {
+    return;
+  }
+  log_io_.write(log_data, size);
+
+  // check for I/O error
+  if (log_io_.bad()) {
+    LOG_ERROR("I/O error while writing log");
+    return;
+  }
+  // needs to flush to keep disk file in sync
+  log_io_.flush();
+}
+
+void DiskManager::WriteDb() {
+
 }
 
 }  // namespace ghostdb

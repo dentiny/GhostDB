@@ -24,6 +24,9 @@ class DiskManager {
  public:
   DiskManager();  // memtable WAL
   DiskManager(int level, int run);  // SSTable
+  ~DiskManager() noexcept;
+  void WriteLog(char *log_data, int size);
+  void WriteDb();
 
  private:
   std::fstream log_io_;
