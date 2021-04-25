@@ -33,9 +33,10 @@ class GhostDB {
   bool Delete(int32_t key);
 
  private:
+  /** DB holds exactly one currently-using buffer */
   std::unique_ptr<Buffer> buffer_;
+  /** DB holds at most MAX_LEVEL_NUM levels, each has upper limit of runs */
   std::vector<std::unique_ptr<Level*>> levels_;
-  std::unique_ptr<LogManager> log_manager_;
 };
 
 }  // namespace ghostdb

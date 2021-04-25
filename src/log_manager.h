@@ -25,9 +25,9 @@ namespace ghostdb {
 
 class LogManager {
  public:
-  LogManager(int level, int run);
+  LogManager();
   ~LogManager() noexcept;
-  void AppendLogRecord();
+  void AppendLogRecord(int32_t key, int32_t val);
 
  private:
   void Flush();
@@ -38,6 +38,7 @@ class LogManager {
   std::unique_ptr<DiskManager> disk_manager_;
   std::atomic<bool> enable_logging_;
   std::atomic<bool> request_flush_;
+  static constexpr int RECORD_SIZE = 2 * sizeof(int32_t);
   int log_buffer_size_;
   int flush_buffer_size_;
   char *log_buffer_;  // buffer to apppend

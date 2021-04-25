@@ -10,6 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+/*
+ * NOTE: Everytime a Put() is invoked, increment cur_size_ by 1, and append it to WAL.
+ * Also, cur_size_ could be different with kv_.size(), which is # of valid kv pairs. 
+ */
+
 #pragma once
 
 #include <cstdint>
@@ -17,8 +22,8 @@
 #include <memory>
 
 #include "config.h"
-#include "disk_manager.h"
 #include "logger.h"
+#include "log_manager.h"
 
 namespace ghostdb {
 
@@ -29,10 +34,11 @@ class Buffer {
   bool Get(int32_t key, int32_t **val);
 
  private:
+  uint32_t cur_size_;
   uint32_t buffer_size_;
   std::map<int32_t, int32_t> kv_;
-  /** memtable WAL */
-  std::unique_ptr<DiskManager> disk_manager_;
+  /** log_manager for buffer WAL */
+  std::unique_ptr<LogManager> log_manager_;
 };
 
 }  // namespace ghostdb
