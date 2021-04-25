@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "common.h"
 #include "db.h"
 
 using std::make_unique;
@@ -24,12 +25,20 @@ namespace ghostdb {
 
 void SingleThreadTest() {
   unique_ptr<GhostDB> db = make_unique<GhostDB>();
-  assert(db->Put(1, 2));
-  int32_t val;
-  assert(db->Get(1, &val));
-  assert(val == 2);
-  assert(db->Delete(1));
-  assert(!db->Get(1, &val));
+  for (Key key = 0; key < 10; ++key) {
+    Val val = key;
+    assert(db->Put(key, val));
+  }
+  for (Key key = 0; key < 10; ++key) {
+    Val val;
+    assert(db->Get(key, &val));
+    Val expected = key;
+    assert(val == expected);
+  }
+  for (Key key = 11; key < 20; ++key) {
+    Val val = key;
+    assert(!db->Put(key, val));
+  }
 }
 
 }  // namespace ghostdb

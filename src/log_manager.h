@@ -18,6 +18,7 @@
 #include <memory>
 #include <mutex>  // NOLINT
 
+#include "common.h"
 #include "config.h"
 #include "disk_manager.h"
 
@@ -27,10 +28,10 @@ class LogManager {
  public:
   LogManager();
   ~LogManager() noexcept;
-  void AppendLogRecord(int32_t key, int32_t val);
+  void Flush();
+  void AppendLogRecord(Key key, Val val);
 
  private:
-  void Flush();
   void RunFlushThread();
   void StopFlushThread();
 
@@ -38,7 +39,6 @@ class LogManager {
   std::unique_ptr<DiskManager> disk_manager_;
   std::atomic<bool> enable_logging_;
   std::atomic<bool> request_flush_;
-  static constexpr int RECORD_SIZE = 2 * sizeof(int32_t);
   int log_buffer_size_;
   int flush_buffer_size_;
   char *log_buffer_;  // buffer to apppend

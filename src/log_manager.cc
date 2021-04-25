@@ -11,9 +11,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <cassert>
+#include <cstring>
+#include <string>
 #include <utility>
 
-#include "coding.h"
 #include "log_manager.h"
 
 namespace ghostdb {
@@ -41,7 +42,7 @@ LogManager::~LogManager() {
  * Conditions for flushing WAL:
  * (1) wait period exceeds LOG_TIMEOUT
  * (2) no sufficient space for in-coming record(invoked within AppendLogRecord)
- * (3) StopFlushThread invoke Flush, then blocks until flush completes 
+ * (3) GhostDB explicitly invoked Flush when memtable full, have to flush WAL before persisting
  */
 void LogManager::RunFlushThread() {
   LOG_DEBUG("Start WAL flush thread");
@@ -78,16 +79,18 @@ void LogManager::StopFlushThread() {
   assert(flush_buffer_size_ == 0);
 }
 
-void LogManager::AppendLogRecord(int32_t key, int32_t val) {
+void LogManager::AppendLogRecord(Key key, Val val) {
   std::unique_lock<std::mutex> lck(latch_);
   if (log_buffer_size_ + RECORD_SIZE >= LOG_BUFFER_SIZE) {
+    LOG_DEBUG("Log buffer currently full, size = ", log_buffer_size_, ", need to flush");
     request_flush_ = true;
     flush_cv_.notify_one();
     append_cv_.wait(lck, [&]() { return log_buffer_size_ + RECORD_SIZE < LOG_BUFFER_SIZE; });
   }
-  uint64_t record = (static_cast<uint32_t>(key) << 4) | (static_cast<uint32_t>(val));
-  EncodeFixed64(log_buffer_ + log_buffer_size_, record);
-  log_buffer_size_ += RECORD_SIZE;
+  memmove(log_buffer_ + log_buffer_size_, &key, sizeof(Key));
+  log_buffer_size_ += static_cast<int>(sizeof(Key));
+  memmove(log_buffer_ + log_buffer_size_, &val, sizeof(Val));
+  log_buffer_size_ += static_cast<int>(sizeof(Val));
 }
 
 }  // namespace ghostdb

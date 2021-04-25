@@ -12,8 +12,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <map>
 #include <string>
 
 #include "config.h"
@@ -27,7 +29,9 @@ class DiskManager {
   DiskManager(int level, int run);  // SSTable
   ~DiskManager() noexcept;
   void WriteLog(char *log_data, int size);
-  void WriteDb();
+  /** DB data consists of bloom filter and key-value pairs */
+  void AppendDb(const char *db_data, int size);
+  void FlushDb();
 
  private:
   std::fstream log_io_;

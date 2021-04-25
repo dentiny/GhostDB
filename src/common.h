@@ -2,9 +2,9 @@
 //
 //                         GhostDB
 //
-// coding.h
+// common.h
 //
-// Identification: src/coding.h
+// Identification: src/common.h
 //
 // Copyright (c) 2021
 //
@@ -16,7 +16,8 @@
 
 namespace ghostdb {
 
-void EncodeFixed32(char *dst, uint32_t value);
-void EncodeFixed64(char *dst, uint64_t value);
+using Key = int32_t;
+using Val = int32_t;
+static constexpr int RECORD_SIZE = sizeof(Key) + sizeof(Val);
 
 }  // namespace ghostdb
