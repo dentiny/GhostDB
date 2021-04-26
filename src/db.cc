@@ -56,8 +56,7 @@ bool GhostDB::Put(Key key, Val val) {
     }
     levels_[level_no]->DumpTable(run_no, buffer_->kv_);
   } else {
-    // TODO: compaction thread
-    
+    compaction_manager_->RequestMinorCompaction();
   }
   buffer_->ClearKV();
   Put(key, val);

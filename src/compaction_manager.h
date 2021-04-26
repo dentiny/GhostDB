@@ -46,10 +46,11 @@ class CompactionManager {
   std::unique_ptr<DiskManager> disk_manager_;
   std::atomic<bool> enable_compaction_;
   std::atomic<bool> request_minor_compaction_;
+  std::atomic<bool> request_major_compaction_;
 
   std::mutex latch_;
-  std::condition_variable major_compaction_cv_;
-  std::condition_variable minor_compaction_cv_;
+  std::condition_variable compaction_cv_;
+  std::condition_variable wait_compaction_cv_;
   std::future<void> compaction_future_;
 };
 

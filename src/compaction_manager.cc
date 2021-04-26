@@ -31,14 +31,19 @@ void CompactionManager::RunCompactionThread() {
   compaction_future_ = std::async([&]() {
     while (enable_compaction_) {
       std::unique_lock<std::mutex> lck(latch_);
-      major_compaction_cv_.wait_for(lck, COMPACTION_TIMEOUT, [&]{ return request_minor_compaction_.load(); });
-      if (request_minor_compaction_) {
-        LOG_DEBUG("Try minor compaction");
-      } else {
-        LOG_DEBUG("Try major compaction");
+      compaction_cv_.wait_for(lck, COMPACTION_TIMEOUT, [&]{
+        return request_minor_compaction_.load() || request_major_compaction_.load();
+      });
+      // major compaction owns precedence over minor compaction
+      if (request_major_compaction_) {
+        LaunchMajorCompaction();
+        request_major_compaction_ = false;
+        request_minor_compaction_ = false;
+      } else if (request_minor_compaction_) {
+        LaunchMinorCompaction();
+        request_minor_compaction_ = false;
       }
-      // TODO: compaction
-      request_minor_compaction_ = false;
+      wait_compaction_cv_.notify_all();
     }
   });
 }
@@ -50,19 +55,27 @@ void CompactionManager::StopCompactionThread() {
 }
 
 void CompactionManager::RequestMinorCompaction() {
-
+  std::unique_lock<std::mutex> lck(latch_);
+  request_minor_compaction_ = true;
+  compaction_cv_.notify_one();
+  wait_compaction_cv_.wait(lck, [&]() { return !request_minor_compaction_; });  // block until compaction completes
 }
 
 void CompactionManager::RequestMajorCompaction() {
-
+  std::unique_lock<std::mutex> lck(latch_);
+  request_major_compaction_ = true;
+  compaction_cv_.notify_one();
+  wait_compaction_cv_.wait(lck, [&]() { return !request_major_compaction_; });  // block until compaction completes
 }
 
+// Invoked with latch_ held.
 void CompactionManager::LaunchMinorCompaction() {
-
+  LOG_DEBUG("Launch minor compaction");
 }
 
+// Invoked with latch_ held.
 void CompactionManager::LaunchMajorCompaction() {
-
+  LOG_DEBUG("Launch major compaction");
 }
 
 }  // namespace ghostdb

@@ -29,7 +29,7 @@ namespace ghostdb {
 static constexpr const char *const db_base = "/home/hj110/testdb/";
 /** logging interval */
 static constexpr std::chrono::duration<int64_t> LOG_TIMEOUT = std::chrono::seconds(1);
-/** merge interval */
+/** major compaction interval */
 static constexpr std::chrono::duration<int64_t> COMPACTION_TIMEOUT = std::chrono::seconds(5);
 /** value for Delete operation */
 static constexpr Val TOMBSTOME = std::numeric_limits<Val>::min();
@@ -39,6 +39,10 @@ static constexpr int MAX_LEVEL_NUM = 5;
 static constexpr int MAX_RUN_PER_LEVEL = 1;
 /** # of kv pairs within buffer */
 static constexpr int MAX_BUFFER_SIZE = 10;
+/** # of biggest runs in a level, used to calculate sstable_id(reference common.h) */
+static constexpr int MAX_RUN_IN_LEVEL = MAX_LEVEL_NUM * MAX_RUN_PER_LEVEL;
+/** # of all possible runs, used to fix the size of ClockReplacer */
+static constexpr int SSTABLE_NUM = MAX_RUN_IN_LEVEL * MAX_LEVEL_NUM;
 /** # of kv pairs could dump into SSTable without compaction(debug util) */
 static constexpr int KV_NUM_WITHOUT_COMPACT = MAX_LEVEL_NUM * (MAX_LEVEL_NUM + 1) * MAX_RUN_PER_LEVEL * MAX_BUFFER_SIZE / 2;
 /** # of kv pairs in WAL buffer, used to flush WAL into disk periodically */
