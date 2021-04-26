@@ -32,10 +32,8 @@ namespace ghostdb {
 class Level {
  public:
   Level(int level);
-  bool DumpTable(const std::map<Key, Val>& memtable);
-
- private:
   int GetAvaiRun() const;
+  bool DumpTable(int run_no, const std::map<Key, Val>& memtable);
 
  private:
   int level_;

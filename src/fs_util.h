@@ -2,9 +2,9 @@
 //
 //                         GhostDB
 //
-// string_util.h
+// fs_util.h
 //
-// Identification: src/string_util.h
+// Identification: src/fs_util.h
 //
 // Copyright (c) 2021
 //
@@ -12,13 +12,12 @@
 
 #pragma once
 
-#include <map>
-#include <string>
-
 namespace ghostdb {
 
-std::string StringConcat(const char *base, const char *filename);
+void RemoveDirectory(const char *path);
 
-std::string MemtableToString(const std::map<Key, Val>& memtable);
+void CreateDirectory(const char *path);
+
+void InitDirectory(const char *path);
 
 }  // namespace ghostdb

@@ -32,6 +32,7 @@ class Buffer {
   explicit Buffer(uint32_t buffer_size);
   bool Put(Key key, Val val);
   bool Get(Key key, Val **val);
+  void ClearKV() { kv_.clear(); }
 
  private:
   uint32_t buffer_size_;

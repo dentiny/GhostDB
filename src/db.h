@@ -34,6 +34,9 @@ class GhostDB {
   bool Delete(Key key);
 
  private:
+  bool GetAvaiRun(int *level_no, int *run_no) const;
+
+ private:
   /** DB holds exactly one currently-using buffer */
   std::unique_ptr<Buffer> buffer_;
   /** DB holds at most MAX_LEVEL_NUM levels, each has upper limit of runs */

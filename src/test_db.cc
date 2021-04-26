@@ -24,20 +24,11 @@ using std::unique_ptr;
 namespace ghostdb {
 
 void SingleThreadTest() {
+  // max key-value pairs without compaction: 160
   unique_ptr<GhostDB> db = make_unique<GhostDB>();
-  for (Key key = 0; key < 10; ++key) {
+  for (Key key = 0; key < 161; ++key) {
     Val val = key;
     assert(db->Put(key, val));
-  }
-  for (Key key = 0; key < 10; ++key) {
-    Val val;
-    assert(db->Get(key, &val));
-    Val expected = key;
-    assert(val == expected);
-  }
-  for (Key key = 11; key < 20; ++key) {
-    Val val = key;
-    assert(!db->Put(key, val));
   }
 }
 
