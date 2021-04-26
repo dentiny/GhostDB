@@ -19,18 +19,22 @@ using std::string;
 
 namespace ghostdb {
 
-DiskManager::DiskManager() {
-  string log_file = StringConcat(db_base, "memtable.log");
-  log_io_.open(log_file, std::ios::binary | std::ios::trunc | std::ios::out);
-  log_io_.close();
-  // reopen with original mode
-  log_io_.open(log_file, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
-  if (!log_io_.is_open()) {
-    LOG_ERROR("cannot open db log");
+DiskManager::DiskManager(bool is_compaction) :
+  is_compaction_(is_compaction) {
+  if (!is_compaction_) {
+    string log_file = StringConcat(db_base, "memtable.log");
+    log_io_.open(log_file, std::ios::binary | std::ios::trunc | std::ios::out);
+    log_io_.close();
+    // reopen with original mode
+    log_io_.open(log_file, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
+    if (!log_io_.is_open()) {
+      LOG_ERROR("cannot open db log");
+    }
   }
 }
 
-DiskManager::DiskManager(int level, int run) {
+DiskManager::DiskManager(int level, int run) :
+  is_compaction_(false) {
   LOG_DEBUG("run = ", run, "; level = ", level);
   assert(level < MAX_LEVEL_NUM);
   assert(run < (level + 1) * MAX_RUN_PER_LEVEL);
@@ -86,9 +90,13 @@ void DiskManager::AppendDb(const char *db_data, int size) {
   }
 }
 
+// Marks the completion of write.
+// For compaction thread, close current IO; and keep stream open for Run IO.
 void DiskManager::FlushDb() {
-  // needs to flush to keep disk file in sync
   db_io_.flush();
+  if (is_compaction_) {
+    db_io_.close();
+  }
 }
 
 }  // namespace ghostdb

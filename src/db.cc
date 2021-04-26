@@ -25,6 +25,7 @@ using std::vector;
 namespace ghostdb {
 
 GhostDB::GhostDB() :
+  compaction_manager_(make_unique<CompactionManager>()),
   buffer_(make_unique<Buffer>(MAX_BUFFER_SIZE)),
   levels_(vector<unique_ptr<Level>>(MAX_LEVEL_NUM)) {
   InitDirectory(db_base);

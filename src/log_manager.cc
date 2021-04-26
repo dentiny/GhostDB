@@ -38,12 +38,6 @@ LogManager::~LogManager() {
   flush_buffer_ = nullptr;
 }
 
-/*
- * Conditions for flushing WAL:
- * (1) wait period exceeds LOG_TIMEOUT
- * (2) no sufficient space for in-coming record(invoked within AppendLogRecord)
- * (3) GhostDB explicitly invoked Flush when memtable full, have to flush WAL before persisting
- */
 void LogManager::RunFlushThread() {
   LOG_DEBUG("Start WAL flush thread");
   flush_future_ = std::async([&]() {

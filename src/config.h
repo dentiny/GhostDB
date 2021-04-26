@@ -30,7 +30,7 @@ static constexpr const char *const db_base = "/home/hj110/testdb/";
 /** logging interval */
 static constexpr std::chrono::duration<int64_t> LOG_TIMEOUT = std::chrono::seconds(1);
 /** merge interval */
-static constexpr std::chrono::duration<int64_t> MERGE_TIMEOUT = std::chrono::seconds(5);
+static constexpr std::chrono::duration<int64_t> COMPACTION_TIMEOUT = std::chrono::seconds(5);
 /** value for Delete operation */
 static constexpr Val TOMBSTOME = std::numeric_limits<Val>::min();
 /** max level # */
