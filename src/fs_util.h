@@ -20,4 +20,10 @@ void CreateDirectory(const char *path);
 
 void InitDirectory(const char *path);
 
+void RemoveFile(const char *path);
+
+void CreateFile(const char *path);
+
+void InitFile(const char *path);
+
 }  // namespace ghostdb
