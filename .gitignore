@@ -50,7 +50,7 @@ configure
 config-h.in
 autom4te.cache
 *Makefile.in
-*Makefile
+#*Makefile
 libtool
 aclocal.m4
 config.log
