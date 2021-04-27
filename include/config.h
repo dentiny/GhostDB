@@ -33,6 +33,8 @@ static constexpr std::chrono::duration<int64_t> LOG_TIMEOUT = std::chrono::secon
 static constexpr std::chrono::duration<int64_t> COMPACTION_TIMEOUT = std::chrono::seconds(5);
 /** value for Delete operation */
 static constexpr Val TOMBSTOME = std::numeric_limits<Val>::min();
+/** size of the buffer pool */
+static constexpr int BUFFER_POOL_SIZE = 3;
 /** max level # */
 static constexpr int MAX_LEVEL_NUM = 5;
 /** # of run = MAX_RUN_PER_LEVEL * level # */

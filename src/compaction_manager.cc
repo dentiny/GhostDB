@@ -11,13 +11,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "compaction_manager.h"
+#include "config.h"
+#include "logger.h"
 
 using std::make_unique;
 
 namespace ghostdb {
 
 CompactionManager::CompactionManager() :
-  disk_manager_(make_unique<DiskManager>(true /* is_compaction */)),
   enable_compaction_(true) {
   RunCompactionThread();
 }

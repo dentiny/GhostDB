@@ -12,13 +12,17 @@
 
 #pragma once
 
-#include "clock_replacer.h"
 #include "disk_manager.h"
 
 namespace ghostdb {
 
 class BufferPoolManager {
+ public:
+  BufferPoolManager(int pool_size, DiskManager *disk_manager);
 
+ private:
+  int pool_size_;
+  DiskManager *disk_manager_;
 };
 
 }  // namespace ghostdb

@@ -22,10 +22,7 @@
 #include <atomic>
 #include <condition_variable>  // NOLINT
 #include <future>  // NOLINT
-#include <memory>
 #include <mutex>  // NOLINT
-
-#include "disk_manager.h"
 
 namespace ghostdb {
 
@@ -43,7 +40,6 @@ class CompactionManager {
   void LaunchMajorCompaction();
 
  private:
-  std::unique_ptr<DiskManager> disk_manager_;
   std::atomic<bool> enable_compaction_;
   std::atomic<bool> request_minor_compaction_;
   std::atomic<bool> request_major_compaction_;

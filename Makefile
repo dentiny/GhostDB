@@ -12,7 +12,6 @@ BUILD    = $(CUR_DIR)/build
 OBJS     = $(BUILD)/bloom.o                \
            $(BUILD)/buffer.o               \
            $(BUILD)/buffer_pool_manager.o  \
-           $(BUILD)/clock_replacer.o       \
            $(BUILD)/compaction_manager.o   \
            $(BUILD)/db.o                   \
            $(BUILD)/disk_manager.o         \
@@ -52,9 +51,6 @@ $(BUILD)/log_manager.o: $(SRC)/log_manager.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -pthread -I $(INC) -c $< -o $@
 
 $(BUILD)/compaction_manager.o: $(SRC)/compaction_manager.cc $(INCLUDES)
-	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
-
-$(BUILD)/clock_replacer.o: $(SRC)/clock_replacer.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
 $(BUILD)/buffer_pool_manager.o: $(SRC)/buffer_pool_manager.cc $(INCLUDES)
