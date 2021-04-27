@@ -10,10 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <cassert>
+
 #include "config.h"
 #include "sstable_manager.h"
 
 using std::make_unique;
+using std::map;
 using std::unique_ptr;
 using std::vector;
 
@@ -52,7 +55,7 @@ bool SSTableManager::GetAvaiRun(int *level_no, int *run_no) const {
 }
 
 // @return: true for dump succeeds, false for no available run, minor compaction needed
-bool SSTableManager::DumpTable(const std::map<Key, Val>& memtable) {
+bool SSTableManager::DumpTable(const map<Key, Val>& memtable) {
   int level_no = -1;
   int run_no = -1;
   bool can_dump = GetAvaiRun(&level_no, &run_no);
@@ -65,6 +68,11 @@ bool SSTableManager::DumpTable(const std::map<Key, Val>& memtable) {
     return true;
   }
   return false;
+}
+
+void SSTableManager::LoadTable(int level_no, int run_no, memtable_t *memtable) {
+  assert(levels_[level_no] != nullptr);
+  levels_[level_no]->LoadTable(run_no, memtable);
 }
 
 }  // namespace ghostdb

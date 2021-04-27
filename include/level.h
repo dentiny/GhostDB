@@ -34,6 +34,7 @@ class Level {
   Level(int level);
   int GetAvaiRun() const;
   bool DumpTable(int run_no, const std::map<Key, Val>& memtable);
+  void LoadTable(int run_no, memtable_t *memtable);
 
  private:
   int level_;

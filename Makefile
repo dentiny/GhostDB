@@ -14,22 +14,19 @@ OBJS     = $(BUILD)/bloom.o                \
            $(BUILD)/compaction_manager.o   \
            $(BUILD)/db.o                   \
            $(BUILD)/disk_manager.o         \
-           $(BUILD)/fs_util.o              \
            $(BUILD)/level.o                \
            $(BUILD)/log_manager.o          \
+					 $(BUILD)/page.o                 \
            $(BUILD)/run.o                  \
 					 $(BUILD)/sstable_manager.o      \
-           $(BUILD)/string_util.o
+					 $(BUILD)/util.o
 
 all: $(OBJS) $(BUILD)/test_db
 
 $(BUILD)/test_db: $(TEST)/test_db.cc $(OBJS)
 	$(CC) $(CFLAGS) -pthread -I $(INC) $^ -o $@
 
-$(BUILD)/fs_util.o: $(SRC)/fs_util.cc $(INCLUDES)
-	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
-
-$(BUILD)/string_util.o: $(SRC)/string_util.cc $(INCLUDES)
+$(BUILD)/util.o: $(SRC)/util.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
 $(BUILD)/buffer.o: $(SRC)/buffer.cc $(INCLUDES)
@@ -42,6 +39,9 @@ $(BUILD)/run.o: $(SRC)/run.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
 $(BUILD)/level.o: $(SRC)/level.cc $(INCLUDES)
+	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
+
+$(BUILD)/page.o: $(SRC)/page.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
 $(BUILD)/disk_manager.o: $(SRC)/disk_manager.cc $(INCLUDES)

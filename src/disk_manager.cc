@@ -13,8 +13,10 @@
 #include <cassert>
 
 #include "disk_manager.h"
-#include "string_util.h"
+#include "page.h"
+#include "util.h"
 
+using std::map;
 using std::string;
 
 namespace ghostdb {
@@ -58,6 +60,7 @@ DiskManager::~DiskManager() {
 
 void DiskManager::WriteLog(char *log_data, int size) {
   assert(log_data != nullptr);
+  assert(log_io_.is_open());
   if (size == 0) {
     return;
   }
@@ -72,8 +75,9 @@ void DiskManager::WriteLog(char *log_data, int size) {
   log_io_.flush();
 }
 
-void DiskManager::AppendDb(const char *db_data, int size) {
+void DiskManager::WriteDb(char *db_data, int size) {
   assert(db_data != nullptr);
+  assert(db_io_.is_open());
   if (size == 0) {
     return;
   }
@@ -84,10 +88,20 @@ void DiskManager::AppendDb(const char *db_data, int size) {
     LOG_ERROR("I/O error while writing log");
     return;
   }
+  // needs to flush to keep disk file in sync
+  db_io_.flush();
 }
 
-void DiskManager::FlushDb() {
-  db_io_.flush();
+// Read at the page granularity.
+void DiskManager::LoadTable(memtable_t *memtable) {
+  assert(db_io_.is_open());
+  char *page_data = new char[PAGE_SIZE];
+  db_io_.read(page_data, PAGE_SIZE);
+  if (db_io_.bad()) {
+    LOG_ERROR("I/O error while reading db data");
+  }
+  Page page(page_data);
+  page.GetMemtable(memtable);
 }
 
 }  // namespace ghostdb

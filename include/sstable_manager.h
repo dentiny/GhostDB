@@ -16,6 +16,7 @@
 #include <map>
 #include <vector>
 
+#include "common.h"
 #include "level.h"
 #include "run.h"
 
@@ -25,7 +26,8 @@ class SSTableManager {
  public:
   SSTableManager();
   ~SSTableManager() = default;
-  bool DumpTable(const std::map<Key, Val>& kv);
+  bool DumpTable(const std::map<Key, Val>& memtable);
+  void LoadTable(int level_no, int run_no, memtable_t *memtable);
 
  private:
   bool GetAvaiRun(int *level_no, int *run_no) const;

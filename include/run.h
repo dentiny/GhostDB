@@ -16,6 +16,7 @@
 #include <memory>
 
 #include "bloom.h"
+#include "common.h"
 #include "disk_manager.h"
 
 namespace ghostdb {
@@ -25,6 +26,7 @@ class Run {
   Run(int level, int run);
   bool IsEmpty() const { return is_empty_; }
   bool DumpTable(const std::map<Key, Val>& memtable);
+  void LoadTable(memtable_t *memtable);
 
  private:
   int level_;

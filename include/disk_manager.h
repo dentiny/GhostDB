@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 
+#include "common.h"
 #include "config.h"
 #include "logger.h"
 
@@ -35,9 +36,8 @@ class DiskManager {
   DiskManager(int level, int run);  // SSTable
   ~DiskManager() noexcept;
   void WriteLog(char *log_data, int size);
-  /** DB data consists of bloom filter and key-value pairs */
-  void AppendDb(const char *db_data, int size);
-  void FlushDb();
+  void WriteDb(char *db_data, int size);
+  void LoadTable(memtable_t *memtable);
 
  private:
   std::fstream log_io_;

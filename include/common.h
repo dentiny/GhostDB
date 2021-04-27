@@ -13,6 +13,8 @@
 #pragma once
 
 #include <cstdint>
+#include <utility>
+#include <vector>
 
 namespace ghostdb {
 
@@ -26,5 +28,11 @@ static constexpr int RECORD_SIZE = sizeof(Key) + sizeof(Val);
  * sstable_id = MAX_RUN_IN_LEVEL * level + run
  */
 using sstable_id_t = int;
+
+/*
+ * When reading key-value pair from storage, since they're already sorted while dumping,
+ * keeping them in the vector is enough for merging and binary search.
+ */
+using memtable_t = std::vector<std::pair<Key, Val>>;
 
 }  // namespace ghostdb

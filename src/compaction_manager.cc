@@ -10,16 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <map>
+
 #include "compaction_manager.h"
 #include "config.h"
 #include "logger.h"
 
 using std::make_unique;
+using std::map;
 
 namespace ghostdb {
 
-CompactionManager::CompactionManager() :
-  enable_compaction_(true) {
+CompactionManager::CompactionManager(SSTableManager *sstable_manager) :
+  enable_compaction_(true),
+  sstable_manager_(sstable_manager) {
   RunCompactionThread();
 }
 
@@ -70,8 +74,16 @@ void CompactionManager::RequestMajorCompaction() {
 }
 
 // Invoked with latch_ held.
+// TODO: currently doesn't dump intermediary memtable into temporary files
 void CompactionManager::LaunchMinorCompaction() {
   LOG_DEBUG("Launch minor compaction");
+  memtable_t memtable;  // TODO: merge memtables
+  for (int level_no = MINOR_COMPACTION_LEVEL_NUM - 1; level_no >= 0; --level_no) {
+    for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
+      memtable_t sstable_kv;
+      sstable_manager_->LoadTable(level_no, run_no, &sstable_kv);
+    }
+  }
 }
 
 // Invoked with latch_ held.

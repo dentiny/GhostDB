@@ -22,13 +22,17 @@
 #include <atomic>
 #include <condition_variable>  // NOLINT
 #include <future>  // NOLINT
+#include <map>
 #include <mutex>  // NOLINT
+
+#include "common.h"
+#include "sstable_manager.h"
 
 namespace ghostdb {
 
 class CompactionManager {
  public:
-  CompactionManager();
+  CompactionManager(SSTableManager *sstable_manager);
   ~CompactionManager();
   void RequestMinorCompaction();
 
@@ -40,14 +44,16 @@ class CompactionManager {
   void LaunchMajorCompaction();
 
  private:
+  std::mutex latch_;
   std::atomic<bool> enable_compaction_;
   std::atomic<bool> request_minor_compaction_;
   std::atomic<bool> request_major_compaction_;
-
-  std::mutex latch_;
   std::condition_variable compaction_cv_;
   std::condition_variable wait_compaction_cv_;
   std::future<void> compaction_future_;
+
+  /** Used to load and dump Run */
+  SSTableManager *sstable_manager_;
 };
 
 }  // namespace ghostdb

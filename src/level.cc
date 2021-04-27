@@ -18,6 +18,7 @@
 #include "level.h"
 
 using std::make_unique;
+using std::map;
 using std::string;
 using std::unique_ptr;
 using std::vector;
@@ -39,13 +40,18 @@ int Level::GetAvaiRun() const {
   return -1;
 }
 
-bool Level::DumpTable(int run_no, const std::map<Key, Val>& memtable) {
+bool Level::DumpTable(int run_no, const map<Key, Val>& memtable) {
   assert(runs_[run_no] == nullptr || runs_[run_no]->IsEmpty());
   if (runs_[run_no] == nullptr) {
     runs_[run_no] = make_unique<Run>(level_, run_no);
   }
   runs_[run_no]->DumpTable(memtable);
   return true;
+}
+
+void Level::LoadTable(int run_no, memtable_t *memtable) {
+  assert(runs_[run_no] != nullptr && !runs_[run_no]->IsEmpty());
+  runs_[run_no]->LoadTable(memtable);
 }
 
 }  // namespace ghostdb

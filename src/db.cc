@@ -15,7 +15,7 @@
 #include <string>
 
 #include "db.h"
-#include "fs_util.h"
+#include "util.h"
 
 using std::fstream;
 using std::make_unique;
@@ -24,12 +24,12 @@ using std::vector;
 
 namespace ghostdb {
 
-GhostDB::GhostDB() :
-  buffer_(make_unique<Buffer>(MAX_BUFFER_SIZE)),
-  sstable_manager_(make_unique<SSTableManager>()),
-  compaction_manager_(make_unique<CompactionManager>()) {
-  InitDirectory(db_base);
+GhostDB::GhostDB() {
+  InitDirectory(db_base);  // make sure db_base exists at the very beginning of set-up
   LOG_DEBUG("Open db at ", db_base);
+  buffer_ = make_unique<Buffer>(MAX_BUFFER_SIZE);
+  sstable_manager_ = make_unique<SSTableManager>();
+  compaction_manager_ = make_unique<CompactionManager>(sstable_manager_.get());
 }
 
 /*
