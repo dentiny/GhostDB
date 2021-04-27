@@ -11,7 +11,6 @@ TEST     = $(CUR_DIR)/test
 BUILD    = $(CUR_DIR)/build
 OBJS     = $(BUILD)/bloom.o                \
            $(BUILD)/buffer.o               \
-           $(BUILD)/buffer_pool_manager.o  \
            $(BUILD)/compaction_manager.o   \
            $(BUILD)/db.o                   \
            $(BUILD)/disk_manager.o         \
@@ -19,6 +18,7 @@ OBJS     = $(BUILD)/bloom.o                \
            $(BUILD)/level.o                \
            $(BUILD)/log_manager.o          \
            $(BUILD)/run.o                  \
+					 $(BUILD)/sstable_manager.o      \
            $(BUILD)/string_util.o
 
 all: $(OBJS) $(BUILD)/test_db
@@ -53,7 +53,7 @@ $(BUILD)/log_manager.o: $(SRC)/log_manager.cc $(INCLUDES)
 $(BUILD)/compaction_manager.o: $(SRC)/compaction_manager.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
-$(BUILD)/buffer_pool_manager.o: $(SRC)/buffer_pool_manager.cc $(INCLUDES)
+$(BUILD)/sstable_manager.o: $(SRC)/sstable_manager.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
 $(BUILD)/db.o: $(SRC)/db.cc $(INCLUDES)

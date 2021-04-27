@@ -23,6 +23,7 @@
 #include "level.h"
 #include "logger.h"
 #include "log_manager.h"
+#include "sstable_manager.h"
 
 namespace ghostdb {
 
@@ -38,12 +39,12 @@ class GhostDB {
   bool GetAvaiRun(int *level_no, int *run_no) const;
 
  private:
-  /** make minor and major compactions */
-  std::unique_ptr<CompactionManager> compaction_manager_;
   /** DB holds exactly one currently-using buffer */
   std::unique_ptr<Buffer> buffer_;
-  /** DB holds at most MAX_LEVEL_NUM levels, each has upper limit of runs */
-  std::vector<std::unique_ptr<Level>> levels_;
+  /** manages SSTable dumping and loading */
+  std::unique_ptr<SSTableManager> sstable_manager_;
+  /** make minor and major compactions */
+  std::unique_ptr<CompactionManager> compaction_manager_;
 };
 
 }  // namespace ghostdb

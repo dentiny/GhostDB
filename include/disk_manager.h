@@ -11,11 +11,9 @@
 //===----------------------------------------------------------------------===//
 
 /*
- * Three sources of DiskManager IO:
- * (1) buffer WAL, held within Buffer and initialized by DiskManager(), bound with memtable.log
- * (2) SSTable IO, held within Run and initialized by DiskManager(level, run), bound with one specific level_0_run_0.db
- * (3) compaction IO, held within CompactionManager and initialized by DiskManager(is_compaction = true), could update
- * related IO stream 
+ * owners of DiskManager:
+ * (1) LogManager and RecoveryManager: initialized by DiskManager(), working on buffer WAL
+ * (2) Run: each Run holds a DiskManager to manage its corresponding SSTable, initialized by DiskManager(level, run)
  */
 
 #pragma once
@@ -33,7 +31,7 @@ namespace ghostdb {
 
 class DiskManager {
  public:
-  DiskManager(bool is_compaction = false);  // memtable WAL
+  DiskManager();  // memtable WAL
   DiskManager(int level, int run);  // SSTable
   ~DiskManager() noexcept;
   void WriteLog(char *log_data, int size);
@@ -42,7 +40,6 @@ class DiskManager {
   void FlushDb();
 
  private:
-  bool is_compaction_;  // only compaction thread could set db_io_
   std::fstream log_io_;
   std::fstream db_io_;  // SSTable
 };
