@@ -81,6 +81,7 @@ void DiskManager::WriteDb(char *db_data, int size) {
   if (size == 0) {
     return;
   }
+  db_io_.seekg(0, db_io_.beg);
   db_io_.write(db_data, size);
 
   // check for I/O error
@@ -95,7 +96,8 @@ void DiskManager::WriteDb(char *db_data, int size) {
 // Read at the page granularity.
 void DiskManager::LoadTable(memtable_t *memtable) {
   assert(db_io_.is_open());
-  char *page_data = new char[PAGE_SIZE];
+  char *page_data = new char[PAGE_SIZE];  // NOTE: page_data will be de-allocated within Page::Page
+  db_io_.seekg(0, db_io_.beg);
   db_io_.read(page_data, PAGE_SIZE);
   if (db_io_.bad()) {
     LOG_ERROR("I/O error while reading db data");

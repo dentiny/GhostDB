@@ -90,4 +90,4 @@ void InitFile(const char *path) {
   CreateFile(path);
 }
 
-}  // ghostdb
+}  // namespace ghostdb

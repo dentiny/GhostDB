@@ -27,10 +27,6 @@ Page::Page(char *page_data) {
   // Read magic number and has_next_page.
   uint8_t header;
   memmove(&header, page_data + offset, sizeof(header));
-
-  LOG_DEBUG("header & 0xFE = ", header & 0xFE);
-  LOG_DEBUG("PAGE_HEADER_MAGIC = ", PAGE_HEADER_MAGIC);
-
   assert((header & 0xFE) == PAGE_HEADER_MAGIC);
   has_next_page_ = header & 0x1;
   offset += sizeof(header);
