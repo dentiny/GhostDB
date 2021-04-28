@@ -91,12 +91,12 @@ void DiskManager::WriteLog(char *log_data, int size) {
   log_io_.flush();
 }
 
+// @param size could be 0 just to reinitialize I/O stream after compaction
 void DiskManager::WriteDb(char *db_data, int size) {
-  assert(db_data != nullptr);
-  if (!db_io_.is_open()) {
-    ReinitDbFile();
-  }
+  assert(db_data != nullptr || size == 0);
   if (size == 0) {
+    assert(!db_io_.is_open());
+    ReinitDbFile();
     return;
   }
   db_io_.seekg(0, db_io_.beg);  // reset file offset to the beginning

@@ -89,9 +89,11 @@ void Run::RemoveTable() {
   disk_manager_->RemoveTable();
 }
 
+// The original SSTable file has been deleted.
 void Run::MergeSSTableTo() {
   assert(is_empty_);
   is_empty_ = false;
+  disk_manager_->WriteDb(nullptr, 0 /* size */);  // only to reinitialize I/O stream
   string old_name = GetFilename(TEMP_LEVEL_NO, TEMP_RUN_NO);
   string new_name = GetFilename(level_, run_);
   RenameFile(old_name.c_str(), new_name.c_str());

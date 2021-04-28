@@ -65,6 +65,7 @@ bool SSTableManager::DumpTable(const map<Key, Val>& memtable) {
       run_no = 0;
     }
     levels_[level_no]->DumpTable(run_no, memtable);
+    // TODO: need to remove WAL
     return true;
   }
   return false;
@@ -83,6 +84,10 @@ void SSTableManager::RemoveTable(int level_no, int run_no) {
 void SSTableManager::MergeSSTableTo(int level_no, int run_no) {
   assert(levels_[level_no] != nullptr);
   levels_[level_no]->MergeSSTableTo(run_no);
+}
+
+bool SSTableManager::IsEmpty(int level_no, int run_no) const {
+  return levels_[level_no] == nullptr || levels_[level_no]->IsEmpty(run_no);
 }
 
 }  // namespace ghostdb

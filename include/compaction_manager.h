@@ -43,6 +43,7 @@ class CompactionManager {
   void RequestMajorCompaction();
   void LaunchMinorCompaction();
   void LaunchMajorCompaction();
+  void LaunchCompactionImpl(int start_level_no);
 
  private:
   std::mutex latch_;

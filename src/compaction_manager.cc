@@ -82,11 +82,26 @@ void CompactionManager::RequestMajorCompaction() {
 // TODO: currently doesn't dump intermediary memtable into temporary files
 void CompactionManager::LaunchMinorCompaction() {
   LOG_DEBUG("Launch minor compaction");
+  LaunchCompactionImpl(MINOR_COMPACTION_LEVEL_NUM - 1 /* start_level */);
+}
 
-  // Load latest MINOR_COMPACTION_LEVEL_NUM SSTables, and compact them in the memory.
+// Invoked with latch_ held.
+void CompactionManager::LaunchMajorCompaction() {
+  LOG_DEBUG("Launch major compaction");
+  LaunchCompactionImpl(MAX_LEVEL_NUM - 1 /* start_level */);
+}
+
+void CompactionManager::LaunchCompactionImpl(int start_level_no) {
+  bool is_run_avai = true;  // to get out of the double loop
+
+  // Load latest SSTables, and compact them in the memory.
   memtable_t memtable;
-  for (int level_no = MINOR_COMPACTION_LEVEL_NUM - 1; level_no >= 0; --level_no) {
+  for (int level_no = start_level_no; is_run_avai && level_no >= 0; --level_no) {
     for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
+      if (sstable_manager_->IsEmpty(level_no, run_no)) {
+        is_run_avai = false;
+      }
+      LOG_DEBUG("During compaction, try to load level:", level_no, ", run:", run_no);
       Bloom bloom_filter;
       memtable_t sstable_kv;
       sstable_manager_->LoadTable(level_no, run_no, &bloom_filter, &sstable_kv);
@@ -95,19 +110,21 @@ void CompactionManager::LaunchMinorCompaction() {
   }
 
   // Write to temporary files first in case of fs failure, and switch back to SSTable files.
+  is_run_avai = true;
   Run temp_run(TEMP_LEVEL_NO, TEMP_RUN_NO);
   temp_run.DumpTable(memtable);
-  for (int level_no = MINOR_COMPACTION_LEVEL_NUM - 1; level_no >= 0; --level_no) {
+  for (int level_no = start_level_no; is_run_avai && level_no >= 0; --level_no) {
     for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
+      if (sstable_manager_->IsEmpty(level_no, run_no)) {
+        is_run_avai = false;
+        break;
+      }
+      LOG_DEBUG("During compaction, try to remove level:", level_no, ", run:", run_no);
       sstable_manager_->RemoveTable(level_no, run_no);
     }
   }
-  sstable_manager_->MergeSSTableTo(MINOR_COMPACTION_LEVEL_NUM - 1 /* level */, 0 /* run */);
-}
-
-// Invoked with latch_ held.
-void CompactionManager::LaunchMajorCompaction() {
-  LOG_DEBUG("Launch major compaction");
+  sstable_manager_->MergeSSTableTo(start_level_no /* level */, 0 /* run */);
+  LOG_DEBUG("Merge SSTables to level:", start_level_no, ", run:", 0);
 }
 
 }  // namespace ghostdb

@@ -31,6 +31,7 @@ class SSTableManager {
   void LoadTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable);
   void RemoveTable(int level_no, int run_no);
   void MergeSSTableTo(int level_no, int run_no);
+  bool IsEmpty(int level_no, int run_no) const;
 
  private:
   bool GetAvaiRun(int *level_no, int *run_no) const;

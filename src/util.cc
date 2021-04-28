@@ -107,10 +107,10 @@ void InitFile(const char *path) {
 }
 
 void RenameFile(const char *old_name, const char *new_name) {
-  int ret = rename(old_name, new_name);
-  if (ret != 0) {
-    LOG_ERROR("Rename ", old_name, " to ", new_name, " fails.");
-  }
+  char cmd[INIT_CMD_LENGTH] = { 0 };
+  snprintf(cmd, sizeof(cmd), "mv %s %s", old_name, new_name);
+  CheckStringOverflow(cmd);
+  system(cmd);
 }
 
 memtable_t MergeSSTable(const memtable_t& new_sstable, const memtable_t& old_sstable) {
@@ -134,7 +134,9 @@ memtable_t MergeSSTable(const memtable_t& new_sstable, const memtable_t& old_sst
     } else if (old_key < new_key) {
       merged_sstable.emplace_back(old_sstable[idx2++]);
     } else {
-      merged_sstable.emplace_back(new_sstable[idx1]);
+      if (new_key != TOMBSTOME) {
+        merged_sstable.emplace_back(new_sstable[idx1]);
+      }
       ++idx1;
       ++idx2;
     }

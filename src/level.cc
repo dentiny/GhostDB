@@ -64,4 +64,8 @@ void Level::MergeSSTableTo(int run_no) {
   runs_[run_no]->MergeSSTableTo();
 }
 
+bool Level::IsEmpty(int run_no) const {
+  return runs_[run_no] == nullptr || runs_[run_no]->IsEmpty();
+}
+
 }  // namespace ghostdb

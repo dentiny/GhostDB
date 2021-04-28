@@ -38,6 +38,7 @@ class Level {
   void LoadTable(int run_no, Bloom *filter, memtable_t *memtable);
   void RemoveTable(int run_no);
   void MergeSSTableTo(int run_no);
+  bool IsEmpty(int run_no) const;
 
  private:
   int level_;

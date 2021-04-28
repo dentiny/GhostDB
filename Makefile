@@ -1,6 +1,6 @@
 # compilation options
 CC = g++
-CFLAGS = -std=c++17 -Werror -Wall -pedantic -Wconversion -Wformat
+CFLAGS = -std=c++17 -g3 -Werror -Wall -pedantic -Wconversion -Wformat
 
 # project directories
 CUR_DIR  = $(shell pwd)
