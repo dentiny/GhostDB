@@ -30,6 +30,7 @@ class SSTableManager {
   bool DumpTable(const std::map<Key, Val>& memtable);
   void LoadTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable);
   void RemoveTable(int level_no, int run_no);
+  void MergeSSTableTo(int level_no, int run_no);
 
  private:
   bool GetAvaiRun(int *level_no, int *run_no) const;

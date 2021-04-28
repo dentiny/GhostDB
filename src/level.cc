@@ -59,4 +59,9 @@ void Level::RemoveTable(int run_no) {
   runs_[run_no]->RemoveTable();
 }
 
+void Level::MergeSSTableTo(int run_no) {
+  assert(runs_[run_no] != nullptr && runs_[run_no]->IsEmpty());
+  runs_[run_no]->MergeSSTableTo();
+}
+
 }  // namespace ghostdb

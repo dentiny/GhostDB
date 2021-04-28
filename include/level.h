@@ -37,6 +37,7 @@ class Level {
   bool DumpTable(int run_no, const std::map<Key, Val>& memtable);
   void LoadTable(int run_no, Bloom *filter, memtable_t *memtable);
   void RemoveTable(int run_no);
+  void MergeSSTableTo(int run_no);
 
  private:
   int level_;

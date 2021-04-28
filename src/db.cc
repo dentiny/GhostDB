@@ -49,7 +49,7 @@ bool GhostDB::Put(Key key, Val val) {
   buffer_->log_manager_->Flush();
   while (!sstable_manager_->DumpTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
-    break;
+    LOG_DEBUG("Minor compaction completes.");
   }
   buffer_->ClearKV();
   Put(key, val);
@@ -74,7 +74,10 @@ bool GhostDB::Delete(Key key) {
 }
 
 GhostDB::~GhostDB() {
-  LOG_DEBUG("~GhostDB");
+  LOG_DEBUG("Exit GhostDB, place buffer into SSTable");
+  while (!sstable_manager_->DumpTable(buffer_->kv_)) {
+    compaction_manager_->RequestMinorCompaction();
+  }
 }
 
 }  // namespace ghostdb

@@ -32,6 +32,7 @@ class Run {
   bool DumpTable(const Cont& memtable);
   void LoadTable(Bloom *filter, memtable_t *memtable);
   void RemoveTable();
+  void MergeSSTableTo();
 
  private:
   int level_;

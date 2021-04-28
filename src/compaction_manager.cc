@@ -102,9 +102,7 @@ void CompactionManager::LaunchMinorCompaction() {
       sstable_manager_->RemoveTable(level_no, run_no);
     }
   }
-  string old_name = GetFilename(TEMP_LEVEL_NO, TEMP_RUN_NO);
-  string new_name = GetFilename(MINOR_COMPACTION_LEVEL_NUM - 1, 0);
-  RenameFile(old_name.c_str(), new_name.c_str());
+  sstable_manager_->MergeSSTableTo(MINOR_COMPACTION_LEVEL_NUM - 1 /* level */, 0 /* run */);
 }
 
 // Invoked with latch_ held.

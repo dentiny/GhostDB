@@ -80,4 +80,9 @@ void SSTableManager::RemoveTable(int level_no, int run_no) {
   levels_[level_no]->RemoveTable(run_no);
 }
 
+void SSTableManager::MergeSSTableTo(int level_no, int run_no) {
+  assert(levels_[level_no] != nullptr);
+  levels_[level_no]->MergeSSTableTo(run_no);
+}
+
 }  // namespace ghostdb

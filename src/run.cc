@@ -89,4 +89,12 @@ void Run::RemoveTable() {
   disk_manager_->RemoveTable();
 }
 
+void Run::MergeSSTableTo() {
+  assert(is_empty_);
+  is_empty_ = false;
+  string old_name = GetFilename(TEMP_LEVEL_NO, TEMP_RUN_NO);
+  string new_name = GetFilename(level_, run_);
+  RenameFile(old_name.c_str(), new_name.c_str());
+}
+
 }  // namespace ghostdb

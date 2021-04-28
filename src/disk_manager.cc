@@ -93,7 +93,9 @@ void DiskManager::WriteLog(char *log_data, int size) {
 
 void DiskManager::WriteDb(char *db_data, int size) {
   assert(db_data != nullptr);
-  assert(db_io_.is_open());
+  if (!db_io_.is_open()) {
+    ReinitDbFile();
+  }
   if (size == 0) {
     return;
   }
