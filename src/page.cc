@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <cassert>
-#include <cstring>
 
 #include "logger.h"
 #include "page.h"
@@ -36,10 +35,10 @@ Page::Page(char *page_data) {
   offset += sizeof(kv_num_);
 
   // Read bloom filter.
-  int8_t filter;  // FIXME: hard-code # of bits
+  uint64_t filter;  // FIXME: hard-code # of bits
   memmove(&filter, page_data + offset, sizeof(filter));
   offset += sizeof(filter);
-  bloom_filter_ = bitset<BLOOM_BITS / 8>(filter);
+  bloom_filter_ = Bloom(filter);
 
   // Read key-value pairs.
   memtable_.reserve(kv_num_);
@@ -52,12 +51,14 @@ Page::Page(char *page_data) {
     offset += sizeof(val);
     memtable_.emplace_back(key, val);
   }
+  assert(kv_num_ == static_cast<int32_t>(memtable_.size()));
 
   // Delete the page input.
   delete page_data;
 }
 
-void Page::GetMemtable(memtable_t *memtable) {
+void Page::GetMemtable(Bloom *bloom, memtable_t *memtable) {
+  *bloom = bloom_filter_;
   // There should be only exchange of underlying array pointer, no data movement involved.
   memtable_.swap(*memtable);
 }

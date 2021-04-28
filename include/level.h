@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 
+#include "bloom.h"
 #include "common.h"
 #include "run.h"
 
@@ -34,7 +35,8 @@ class Level {
   Level(int level);
   int GetAvaiRun() const;
   bool DumpTable(int run_no, const std::map<Key, Val>& memtable);
-  void LoadTable(int run_no, memtable_t *memtable);
+  void LoadTable(int run_no, Bloom *filter, memtable_t *memtable);
+  void RemoveTable(int run_no);
 
  private:
   int level_;

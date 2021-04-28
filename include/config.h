@@ -27,6 +27,10 @@ namespace ghostdb {
 
 /** base path for GhostDB */
 static constexpr const char *const db_base = "/home/hj110/testdb/";
+/** level # for temporary compaction file */
+static constexpr int TEMP_LEVEL_NO = -1;
+/** run # for temporary compaction file */
+static constexpr int TEMP_RUN_NO = -1;
 /** logging interval */
 static constexpr std::chrono::duration<int64_t> LOG_TIMEOUT = std::chrono::seconds(1);
 /** major compaction interval */

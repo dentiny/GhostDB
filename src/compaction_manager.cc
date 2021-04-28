@@ -11,13 +11,18 @@
 //===----------------------------------------------------------------------===//
 
 #include <map>
+#include <string>
 
+#include "bloom.h"
 #include "compaction_manager.h"
 #include "config.h"
 #include "logger.h"
+#include "run.h"
+#include "util.h"
 
 using std::make_unique;
 using std::map;
+using std::string;
 
 namespace ghostdb {
 
@@ -77,13 +82,29 @@ void CompactionManager::RequestMajorCompaction() {
 // TODO: currently doesn't dump intermediary memtable into temporary files
 void CompactionManager::LaunchMinorCompaction() {
   LOG_DEBUG("Launch minor compaction");
-  memtable_t memtable;  // TODO: merge memtables
+
+  // Load latest MINOR_COMPACTION_LEVEL_NUM SSTables, and compact them in the memory.
+  memtable_t memtable;
   for (int level_no = MINOR_COMPACTION_LEVEL_NUM - 1; level_no >= 0; --level_no) {
     for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
+      Bloom bloom_filter;
       memtable_t sstable_kv;
-      sstable_manager_->LoadTable(level_no, run_no, &sstable_kv);
+      sstable_manager_->LoadTable(level_no, run_no, &bloom_filter, &sstable_kv);
+      memtable = MergeSSTable(sstable_kv /* new */, memtable /* old */);
     }
   }
+
+  // Write to temporary files first in case of fs failure, and switch back to SSTable files.
+  Run temp_run(TEMP_LEVEL_NO, TEMP_RUN_NO);
+  temp_run.DumpTable(memtable);
+  for (int level_no = MINOR_COMPACTION_LEVEL_NUM - 1; level_no >= 0; --level_no) {
+    for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
+      sstable_manager_->RemoveTable(level_no, run_no);
+    }
+  }
+  string old_name = GetFilename(TEMP_LEVEL_NO, TEMP_RUN_NO);
+  string new_name = GetFilename(MINOR_COMPACTION_LEVEL_NUM - 1, 0);
+  RenameFile(old_name.c_str(), new_name.c_str());
 }
 
 // Invoked with latch_ held.

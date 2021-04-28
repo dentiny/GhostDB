@@ -20,20 +20,25 @@
 
 #include <bitset>
 #include <cstdint>
+#include <cstring>
 #include <utility>
 #include <vector>
 
+#include "bloom.h"
 #include "common.h"
 #include "config.h"
 
 namespace ghostdb {
 
 class Page {
+  // Run could access content in the page.
+  friend class Run;
+
  public:
   Page(char *page_data);
   ~Page() = default;
   inline bool HasNextPage() const { return has_next_page_; }
-  void GetMemtable(std::vector<std::pair<Key, Val>> *memtable);
+  void GetMemtable(Bloom *filter, memtable_t *memtable);
 
  public:
   static constexpr int PAGE_HEADER_SIZE = 8;  // magic number and has_next_page bit
@@ -42,8 +47,8 @@ class Page {
  private:
   bool has_next_page_;
   int32_t kv_num_;
-  std::bitset<BLOOM_BITS / 8> bloom_filter_;
-  std::vector<std::pair<Key, Val>> memtable_;
+  Bloom bloom_filter_;
+  memtable_t memtable_;
 };
 
 }  // namespace ghostdb

@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 
+#include "bloom.h"
 #include "common.h"
 #include "config.h"
 #include "logger.h"
@@ -34,13 +35,21 @@ class DiskManager {
  public:
   DiskManager();  // memtable WAL
   DiskManager(int level, int run);  // SSTable
+  DiskManager(const std::string& filename);  // temporary file for compaction
   ~DiskManager() noexcept;
+  void ReinitDbFile();
   void WriteLog(char *log_data, int size);
   void WriteDb(char *db_data, int size);
-  void LoadTable(memtable_t *memtable);
+  void ReadDb(Bloom *filter, memtable_t *memtable);
+  void RemoveTable();
 
  private:
-  std::fstream log_io_;
+  void InitDbFileImpl();
+
+ private:
+  /** DiskManager works on one file, bookkeeping for reinitialization */
+  std::string db_file_;
+  std::fstream log_io_;  // WAL
   std::fstream db_io_;  // SSTable
 };
 

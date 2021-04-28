@@ -70,9 +70,14 @@ bool SSTableManager::DumpTable(const map<Key, Val>& memtable) {
   return false;
 }
 
-void SSTableManager::LoadTable(int level_no, int run_no, memtable_t *memtable) {
+void SSTableManager::LoadTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable) {
   assert(levels_[level_no] != nullptr);
-  levels_[level_no]->LoadTable(run_no, memtable);
+  levels_[level_no]->LoadTable(run_no, filter, memtable);
+}
+
+void SSTableManager::RemoveTable(int level_no, int run_no) {
+  assert(levels_[level_no] != nullptr);
+  levels_[level_no]->RemoveTable(run_no);
 }
 
 }  // namespace ghostdb

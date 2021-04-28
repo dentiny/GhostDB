@@ -49,9 +49,14 @@ bool Level::DumpTable(int run_no, const map<Key, Val>& memtable) {
   return true;
 }
 
-void Level::LoadTable(int run_no, memtable_t *memtable) {
+void Level::LoadTable(int run_no, Bloom *filter, memtable_t *memtable) {
   assert(runs_[run_no] != nullptr && !runs_[run_no]->IsEmpty());
-  runs_[run_no]->LoadTable(memtable);
+  runs_[run_no]->LoadTable(filter, memtable);
+}
+
+void Level::RemoveTable(int run_no) {
+  assert(runs_[run_no] != nullptr && !runs_[run_no]->IsEmpty());
+  runs_[run_no]->RemoveTable();
 }
 
 }  // namespace ghostdb

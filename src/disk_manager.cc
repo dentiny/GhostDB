@@ -22,11 +22,11 @@ using std::string;
 namespace ghostdb {
 
 DiskManager::DiskManager() {
-  string log_file = StringConcat(db_base, "memtable.log");
-  log_io_.open(log_file, std::ios::binary | std::ios::trunc | std::ios::out);
+  db_file_ = StringConcat(db_base, "memtable.log");
+  log_io_.open(db_file_, std::ios::binary | std::ios::trunc | std::ios::out);
   log_io_.close();
   // reopen with original mode
-  log_io_.open(log_file, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
+  log_io_.open(db_file_, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
   if (!log_io_.is_open()) {
     LOG_ERROR("cannot open db log");
   }
@@ -38,15 +38,31 @@ DiskManager::DiskManager(int level, int run) {
   assert(run < (level + 1) * MAX_RUN_PER_LEVEL);
   char filename[25] = { 0 };
   snprintf(filename, sizeof(filename), "level_%d_run_%d.db", level, run);
-  string db_file = StringConcat(db_base, filename);
-  LOG_DEBUG("DB file:", db_file);
-  db_io_.open(db_file, std::ios::binary | std::ios::trunc | std::ios::out);
+  db_file_ = StringConcat(db_base, filename);
+  LOG_DEBUG("DB file:", db_file_);
+  InitDbFileImpl();
+}
+
+DiskManager::DiskManager(const string& filename) {
+  LOG_DEBUG("Temporary file for compaction:", filename);
+  db_file_ = filename;
+  InitDbFileImpl();
+}
+
+void DiskManager::InitDbFileImpl() {
+  db_io_.open(db_file_, std::ios::binary | std::ios::trunc | std::ios::out);
   db_io_.close();
   // reopen with original mode
-  db_io_.open(db_file, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
+  db_io_.open(db_file_, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
   if (!db_io_.is_open()) {
     LOG_ERROR("cannot open db file");
   }
+}
+
+// Compaction would remove SSTable files, and should be reinitialized when Run re-access them.
+void DiskManager::ReinitDbFile() {
+  LOG_DEBUG("Reinitialize db file ", db_file_);
+  InitDbFileImpl();
 }
 
 DiskManager::~DiskManager() {
@@ -81,7 +97,7 @@ void DiskManager::WriteDb(char *db_data, int size) {
   if (size == 0) {
     return;
   }
-  db_io_.seekg(0, db_io_.beg);
+  db_io_.seekg(0, db_io_.beg);  // reset file offset to the beginning
   db_io_.write(db_data, size);
 
   // check for I/O error
@@ -94,16 +110,22 @@ void DiskManager::WriteDb(char *db_data, int size) {
 }
 
 // Read at the page granularity.
-void DiskManager::LoadTable(memtable_t *memtable) {
+void DiskManager::ReadDb(Bloom *filter, memtable_t *memtable) {
   assert(db_io_.is_open());
   char *page_data = new char[PAGE_SIZE];  // NOTE: page_data will be de-allocated within Page::Page
-  db_io_.seekg(0, db_io_.beg);
+  db_io_.seekg(0, db_io_.beg);  // reset file offset to the beginning
   db_io_.read(page_data, PAGE_SIZE);
   if (db_io_.bad()) {
     LOG_ERROR("I/O error while reading db data");
   }
   Page page(page_data);
-  page.GetMemtable(memtable);
+  page.GetMemtable(filter, memtable);
+}
+
+void DiskManager::RemoveTable() {
+  assert(db_io_.is_open());
+  db_io_.close();
+  RemoveFile(db_file_.c_str());
 }
 
 }  // namespace ghostdb

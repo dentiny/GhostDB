@@ -23,16 +23,20 @@ namespace ghostdb {
 
 class Bloom {
  public:
-  Bloom() = default;
+  Bloom() { filter_ = std::bitset<BLOOM_BITS>(0); }
+  Bloom(uint64_t filter) { filter_ = std::bitset<BLOOM_BITS>(filter); }  // FIXME: hard-code bit #
   ~Bloom() = default;
-  void SetKey(Key key);
+  bool operator==(const Bloom& rhs) { return filter_ == rhs.filter_; }
+  void SetKey(const Key& key);
+  bool CouldHasKey(const Key& key) const;
   void ClearKey();
+  uint64_t ToInt() const;
   std::string ToString() const;
 
  private:
-  uint64_t hash1(Key k) const;
-  uint64_t hash2(Key k) const;
-  uint64_t hash3(Key k) const;
+  uint64_t Hash1(const Key& k) const;
+  uint64_t Hash2(const Key& k) const;
+  uint64_t Hash3(const Key& k) const;
 
  private:
   std::bitset<BLOOM_BITS> filter_;

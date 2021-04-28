@@ -16,21 +16,31 @@ using std::string;
 
 namespace ghostdb {
 
-void Bloom::SetKey(Key key) {
-  filter_.set(hash1(key));
-  filter_.set(hash2(key));
-  filter_.set(hash3(key));
+void Bloom::SetKey(const Key& key) {
+  filter_.set(Hash1(key));
+  filter_.set(Hash2(key));
+  filter_.set(Hash3(key));
+}
+
+bool Bloom::CouldHasKey(const Key& key) const {
+  return filter_.test(Hash1(key)) &&
+         filter_.test(Hash2(key)) &&
+         filter_.test(Hash3(key));
 }
 
 void Bloom::ClearKey() {
   filter_.reset();
 }
 
+uint64_t Bloom::ToInt() const {
+  return static_cast<uint64_t>(filter_.to_ulong());
+}
+
 string Bloom::ToString() const {
   return filter_.to_string();
 }
 
-uint64_t Bloom::hash1(Key k) const {
+uint64_t Bloom::Hash1(const Key& k) const {
   uint64_t key = static_cast<uint64_t>(k);
   key = ~key + (key << 15);
   key = key ^ (key >> 12);
@@ -41,7 +51,7 @@ uint64_t Bloom::hash1(Key k) const {
   return key % BLOOM_BITS;
 }
 
-uint64_t Bloom::hash2(Key k) const {
+uint64_t Bloom::Hash2(const Key& k) const {
   uint64_t key = static_cast<uint64_t>(k);
   key = (key + 0x7ed55d16) + (key << 12);
   key = (key ^ 0xc761c23c) ^ (key >> 19);
@@ -52,7 +62,7 @@ uint64_t Bloom::hash2(Key k) const {
   return key % BLOOM_BITS;
 }
 
-uint64_t Bloom::hash3(Key k) const {
+uint64_t Bloom::Hash3(const Key& k) const {
   uint64_t key = static_cast<uint64_t>(k);
   key = (key ^ 61) ^ (key >> 16);
   key = key + (key << 3);

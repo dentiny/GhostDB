@@ -16,6 +16,7 @@
 #include <map>
 #include <vector>
 
+#include "bloom.h"
 #include "common.h"
 #include "level.h"
 #include "run.h"
@@ -27,7 +28,8 @@ class SSTableManager {
   SSTableManager();
   ~SSTableManager() = default;
   bool DumpTable(const std::map<Key, Val>& memtable);
-  void LoadTable(int level_no, int run_no, memtable_t *memtable);
+  void LoadTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable);
+  void RemoveTable(int level_no, int run_no);
 
  private:
   bool GetAvaiRun(int *level_no, int *run_no) const;

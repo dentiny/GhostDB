@@ -23,6 +23,7 @@
 #include <condition_variable>  // NOLINT
 #include <future>  // NOLINT
 #include <map>
+#include <memory>
 #include <mutex>  // NOLINT
 
 #include "common.h"
