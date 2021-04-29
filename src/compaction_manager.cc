@@ -110,6 +110,7 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
         is_run_avai = false;
         break;
       }
+      LOG_DEBUG("During compaction, load SSTable file level:", level_no, ", run:", run_no);
       Bloom bloom_filter;
       memtable_t sstable_kv;
       sstable_manager_->LoadSSTable(level_no, run_no, &bloom_filter, &sstable_kv);
@@ -119,10 +120,12 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
 
   // Check whether there's SSTable to compact
   if (memtable.empty()) {
+    LOG_DEBUG("there's no SSTable to compact");
     return;
   }
 
   // 2. Dump the compacted SSTable pages into temporary SSTable file
+  LOG_DEBUG("During compaction, dump temporary SSTable file");
   sstable_manager_->DumpTempSSTable(memtable);
 
   // 3. Remove related pages within SSTable pages
@@ -133,14 +136,17 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
         is_run_avai = false;
         break;
       }
+      LOG_DEBUG("During compaction, clear SSTable file level:", level_no, ", run:", run_no);
       sstable_manager_->ClearSSTable(level_no, run_no);
     }
   }
 
   // 4. Copy compacted SSTables pages into the designated page
+  LOG_DEBUG("During compaction, dump compacted memtable to level:", start_level_no, ", run:", 0);
   sstable_manager_->DumpSSTable(start_level_no /* level */, 0 /* run */, memtable);
 
   // 5. Remove the temporary SSTable file
+  LOG_DEBUG("During compaction, remove temporary SSTable file");
   sstable_manager_->ClearTempSSTable();
 }
 

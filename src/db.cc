@@ -50,7 +50,6 @@ bool GhostDB::Put(Key key, Val val) {
   buffer_->log_manager_->Flush();
   while (!sstable_manager_->DumpSSTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
-    break;  // TODO
   }
   LOG_DEBUG("Minor compaction completes.");
   buffer_->ClearKV();
