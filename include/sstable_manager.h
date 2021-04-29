@@ -18,6 +18,7 @@
 
 #include "bloom.h"
 #include "common.h"
+#include "disk_manager.h"
 #include "level.h"
 #include "run.h"
 
@@ -25,18 +26,22 @@ namespace ghostdb {
 
 class SSTableManager {
  public:
-  SSTableManager();
+  SSTableManager(DiskManager *disk_manager);
   ~SSTableManager() = default;
-  bool DumpTable(const std::map<Key, Val>& memtable);
-  void LoadTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable);
-  void RemoveTable(int level_no, int run_no);
-  void MergeSSTableTo(int level_no, int run_no);
+  void ClearTempSSTable();
+  void ClearSSTable(int level_no, int run_no);
+  bool DumpSSTable(const std::map<Key, Val>& memtable);
+  void DumpSSTable(int level, int run, const memtable_t& memtable);
+  void DumpTempSSTable(const std::vector<std::pair<Key, Val>>& memtable);
+  void LoadSSTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable);
   bool IsEmpty(int level_no, int run_no) const;
 
  private:
   bool GetAvaiRun(int *level_no, int *run_no) const;
 
  private:
+  /** manages permanent and temporary SSTable files */
+  DiskManager *disk_manager_;
   /** DB holds at most MAX_LEVEL_NUM levels, each has upper limit of runs */
   std::vector<std::unique_ptr<Level>> levels_;
 };

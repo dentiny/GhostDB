@@ -17,12 +17,14 @@
 
 using std::make_unique;
 using std::map;
+using std::pair;
 using std::unique_ptr;
 using std::vector;
 
 namespace ghostdb {
 
-SSTableManager::SSTableManager() :
+SSTableManager::SSTableManager(DiskManager *disk_manager) :
+  disk_manager_(disk_manager),
   levels_(vector<unique_ptr<Level>>(MAX_LEVEL_NUM)) {}
 
 /*
@@ -46,7 +48,7 @@ bool SSTableManager::GetAvaiRun(int *level_no, int *run_no) const {
     if (avai_run != -1) {
       *level_no = idx;
       *run_no = avai_run;
-      LOG_DEBUG("Could persist to level ", *level_no, ", run ", *run_no);
+      LOG_DEBUG("Dump memtable to level ", *level_no, ", run ", *run_no);
       return true;
     }
   }
@@ -55,35 +57,45 @@ bool SSTableManager::GetAvaiRun(int *level_no, int *run_no) const {
 }
 
 // @return: true for dump succeeds, false for no available run, minor compaction needed
-bool SSTableManager::DumpTable(const map<Key, Val>& memtable) {
+bool SSTableManager::DumpSSTable(const map<Key, Val>& memtable) {
   int level_no = -1;
   int run_no = -1;
   bool can_dump = GetAvaiRun(&level_no, &run_no);
   if (can_dump) {
     if (levels_[level_no] == nullptr) {
-      levels_[level_no] = make_unique<Level>(level_no);
+      levels_[level_no] = make_unique<Level>(level_no, disk_manager_);
       run_no = 0;
     }
-    levels_[level_no]->DumpTable(run_no, memtable);
-    // TODO: need to remove WAL
+    levels_[level_no]->DumpSSTable(run_no, memtable);
     return true;
   }
   return false;
 }
 
-void SSTableManager::LoadTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable) {
+void SSTableManager::DumpSSTable(int level_no, int run_no, const memtable_t& memtable) {
   assert(levels_[level_no] != nullptr);
-  levels_[level_no]->LoadTable(run_no, filter, memtable);
+  levels_[level_no]->DumpSSTable(run_no, memtable);
 }
 
-void SSTableManager::RemoveTable(int level_no, int run_no) {
-  assert(levels_[level_no] != nullptr);
-  levels_[level_no]->RemoveTable(run_no);
+// Leverage Run::DumpSSTable infrastructure to decode memtable, thus use
+// level=MAX_LEVEL_NUM-1, run=0, which is guarenteed to exist.
+void SSTableManager::DumpTempSSTable(const vector<pair<Key, Val>>& memtable) {
+  levels_[MAX_LEVEL_NUM - 1]->DumpSSTable(0 /* run */, memtable);
 }
 
-void SSTableManager::MergeSSTableTo(int level_no, int run_no) {
+void SSTableManager::LoadSSTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable) {
   assert(levels_[level_no] != nullptr);
-  levels_[level_no]->MergeSSTableTo(run_no);
+  levels_[level_no]->LoadSSTable(run_no, filter, memtable);
+}
+
+void SSTableManager::ClearTempSSTable() {
+  char page_data[PAGE_SIZE] = { 0 };
+  disk_manager_->WriteDb(page_data, PAGE_SIZE);
+}
+
+void SSTableManager::ClearSSTable(int level_no, int run_no) {
+  assert(levels_[level_no] != nullptr);
+  levels_[level_no]->ClearSSTable(run_no);
 }
 
 bool SSTableManager::IsEmpty(int level_no, int run_no) const {

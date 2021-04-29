@@ -12,7 +12,7 @@
 
 /*
  * Page Layout
- * | magic number(7 bit) | has_next_page(1 bit) | # of key-value pairs (32 bit) |
+ * | magic number(8 bit) | # of key-value pairs (32 bit) |
  * | bloom filter(BLOOM_BITS, defined at config.h) | memtable |
  */
 
@@ -34,21 +34,21 @@ class Page {
   // Run could access content in the page.
   friend class Run;
 
+  // Check page layout
+  static_assert(sizeof(PAGE_HEADER_MAGIC) == 1);
+
  public:
-  Page(char *page_data);
+  Page() { memset(data_, 0, PAGE_SIZE); }
   ~Page() = default;
-  inline bool HasNextPage() const { return has_next_page_; }
-  void GetMemtable(Bloom *filter, memtable_t *memtable);
 
  public:
-  static constexpr int PAGE_HEADER_SIZE = 8;  // magic number and has_next_page bit
+  static constexpr int PAGE_HEADER_SIZE = 1;  // magic number
   static constexpr int KV_PAIR_NUM_IN_PAGE_HEADER = 4;
+  static constexpr int PAYLOAD_OFFSET = PAGE_HEADER_SIZE + KV_PAIR_NUM_IN_PAGE_HEADER + BLOOM_BITS / 8;
 
- private:
-  bool has_next_page_;
-  int32_t kv_num_;
-  Bloom bloom_filter_;
-  memtable_t memtable_;
+ protected:
+  /** The actual data that is stored within a page. */
+  char data_[PAGE_SIZE]{};
 };
 
 }  // namespace ghostdb

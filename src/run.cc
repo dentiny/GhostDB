@@ -14,14 +14,16 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "logger.h"
-#include "page.h"
 #include "run.h"
+#include "sstable_page.h"
 #include "util.h"
 
+using std::is_same_v;
 using std::make_unique;
 using std::map;
 using std::pair;
@@ -31,19 +33,25 @@ using std::vector;
 
 namespace ghostdb {
 
-Run::Run(int level, int run) :
+Run::Run(int level, int run, DiskManager *disk_manager) :
   level_(level),
   run_(run),
   is_empty_(true),
-  disk_manager_(make_unique<DiskManager>(level, run)) {
-  assert((level == TEMP_LEVEL_NO && run == TEMP_RUN_NO) ||
-         (level < MAX_LEVEL_NUM && run < (level + 1) * MAX_RUN_PER_LEVEL));
+  disk_manager_(disk_manager) {
+  assert(level < MAX_LEVEL_NUM && run < GetMaxRun(level));
+}
+
+void Run::ClearSSTable() {
+  assert(!is_empty_);
+  is_empty_ = true;
+  char page_data[PAGE_SIZE] = { 0 };
+  disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
 }
 
 // About page layout, reference to: page.h
 // TODO: currently don't consider the situation memtable demands more than one page, set has_next_page = 0
 template<typename Cont>
-bool Run::DumpTable(const Cont& memtable) {
+bool Run::DumpSSTable(const Cont& memtable) {
   is_empty_ = false;
   size_t offset = 0;
   char page_data[PAGE_SIZE] = { 0 };
@@ -71,32 +79,25 @@ bool Run::DumpTable(const Cont& memtable) {
   // Dump key-value pairs.
   string kv = MemtableToString(memtable);
   memmove(page_data + offset, kv.c_str(), kv.size());
-  disk_manager_->WriteDb(page_data, PAGE_SIZE);
+
+  // buffer dumps with map, compaction manager dumps with vector
+  if constexpr (is_same_v<map<Key, Val>, Cont>) {
+    disk_manager_->WriteDb(page_data, PAGE_SIZE);
+  } else {
+    disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
+  }
   return true;
 }
 
 // Explicit instantiation to export symbol.
-template bool Run::DumpTable(const vector<pair<Key, Val>>& memtable);
-template bool Run::DumpTable(const map<Key, Val>& memtable);
+template bool Run::DumpSSTable(const vector<pair<Key, Val>>& memtable);
+template bool Run::DumpSSTable(const map<Key, Val>& memtable);
 
-void Run::LoadTable(Bloom *filter, memtable_t *memtable) {
-  disk_manager_->ReadDb(filter, memtable);
-  assert(bloom_filter_ == *filter);
-}
-
-void Run::RemoveTable() {
-  is_empty_ = true;
-  disk_manager_->RemoveTable();
-}
-
-// The original SSTable file has been deleted.
-void Run::MergeSSTableTo() {
-  assert(is_empty_);
-  is_empty_ = false;
-  disk_manager_->WriteDb(nullptr, 0 /* size */);  // only to reinitialize I/O stream
-  string old_name = GetFilename(TEMP_LEVEL_NO, TEMP_RUN_NO);
-  string new_name = GetFilename(level_, run_);
-  RenameFile(old_name.c_str(), new_name.c_str());
+void Run::LoadSSTable(Bloom *filter, memtable_t *memtable) {
+  assert(!is_empty_);
+  SSTablePage sstable_page;
+  disk_manager_->ReadDb(sstable_page.data_);
+  sstable_page.GetMemtable(filter, memtable);
 }
 
 }  // namespace ghostdb

@@ -33,7 +33,7 @@ namespace ghostdb {
 
 class LogManager {
  public:
-  LogManager();
+  LogManager(DiskManager *disk_manager);
   ~LogManager() noexcept;
   void Flush();
   void AppendLogRecord(Key key, Val val);
@@ -43,7 +43,7 @@ class LogManager {
   void StopFlushThread();
 
  private:
-  std::unique_ptr<DiskManager> disk_manager_;
+  DiskManager *disk_manager_;
   std::atomic<bool> enable_logging_;
   std::atomic<bool> request_flush_;
   int log_buffer_size_;

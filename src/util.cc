@@ -113,6 +113,14 @@ void RenameFile(const char *old_name, const char *new_name) {
   system(cmd);
 }
 
+int GetMaxRun(int level) {
+  return (level + 1) * MAX_RUN_PER_LEVEL;
+}
+
+int GetRunIndex(int level, int run) {
+  return level * (level + 1) * MAX_RUN_PER_LEVEL / 2 + run;
+}
+
 memtable_t MergeSSTable(const memtable_t& new_sstable, const memtable_t& old_sstable) {
   memtable_t merged_sstable;
   size_t size1 = new_sstable.size();

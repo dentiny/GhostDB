@@ -20,6 +20,7 @@ namespace ghostdb {
 
 using Key = int32_t;
 using Val = int32_t;
+using MappingType = std::pair<Key, Val>;
 static constexpr int RECORD_SIZE = sizeof(Key) + sizeof(Val);
 
 /**
@@ -33,6 +34,6 @@ using sstable_id_t = int;
  * When reading key-value pair from storage, since they're already sorted while dumping,
  * keeping them in the vector is enough for merging and binary search.
  */
-using memtable_t = std::vector<std::pair<Key, Val>>;
+using memtable_t = std::vector<MappingType>;
 
 }  // namespace ghostdb

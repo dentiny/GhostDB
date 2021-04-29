@@ -16,9 +16,9 @@ OBJS     = $(BUILD)/bloom.o                \
            $(BUILD)/disk_manager.o         \
            $(BUILD)/level.o                \
            $(BUILD)/log_manager.o          \
-					 $(BUILD)/page.o                 \
            $(BUILD)/run.o                  \
 					 $(BUILD)/sstable_manager.o      \
+					 $(BUILD)/sstable_page.o         \
 					 $(BUILD)/util.o
 
 all: $(OBJS) $(BUILD)/test_db
@@ -41,7 +41,7 @@ $(BUILD)/run.o: $(SRC)/run.cc $(INCLUDES)
 $(BUILD)/level.o: $(SRC)/level.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
-$(BUILD)/page.o: $(SRC)/page.cc $(INCLUDES)
+$(BUILD)/sstable_page.o: $(SRC)/sstable_page.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
 $(BUILD)/disk_manager.o: $(SRC)/disk_manager.cc $(INCLUDES)

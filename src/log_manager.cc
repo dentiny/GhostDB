@@ -19,8 +19,8 @@
 
 namespace ghostdb {
 
-LogManager::LogManager() :
-  disk_manager_(std::make_unique<DiskManager>()),
+LogManager::LogManager(DiskManager *disk_manager) :
+  disk_manager_(disk_manager),
   enable_logging_(true),
   request_flush_(false),
   log_buffer_size_(0),

@@ -13,64 +13,43 @@
 #include <cassert>
 
 #include "disk_manager.h"
-#include "page.h"
 #include "util.h"
 
-using std::map;
+using std::fstream;
 using std::string;
 
 namespace ghostdb {
 
 DiskManager::DiskManager() {
-  db_file_ = StringConcat(db_base, "memtable.log");
-  log_io_.open(db_file_, std::ios::binary | std::ios::trunc | std::ios::out);
-  log_io_.close();
+  string wal_file = StringConcat(db_base, "memtable.log");
+  InitFileIOImpl(&log_io_, wal_file);
+  string sstable_file = StringConcat(db_base, "sstable.db");
+  InitFileIOImpl(&db_io_, sstable_file);
+  string temp_sstable = StringConcat(db_base, "sstable.temp");
+  InitFileIOImpl(&temp_io_, temp_sstable);
+}
+
+void DiskManager::InitFileIOImpl(fstream *io, const string& filename) {
+  LOG_DEBUG("Initializing DB file:", filename);
+  io->open(filename, std::ios::binary | std::ios::trunc | std::ios::out);
+  io->close();
   // reopen with original mode
-  log_io_.open(db_file_, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
-  if (!log_io_.is_open()) {
-    LOG_ERROR("cannot open db log");
+  io->open(filename, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
+  if (!io->is_open()) {
+    LOG_ERROR("cannot open db file:", filename);
   }
 }
 
-DiskManager::DiskManager(int level, int run) {
-  LOG_DEBUG("run = ", run, "; level = ", level);
-  assert(level < MAX_LEVEL_NUM);
-  assert(run < (level + 1) * MAX_RUN_PER_LEVEL);
-  char filename[25] = { 0 };
-  snprintf(filename, sizeof(filename), "level_%d_run_%d.db", level, run);
-  db_file_ = StringConcat(db_base, filename);
-  LOG_DEBUG("DB file:", db_file_);
-  InitDbFileImpl();
-}
-
-DiskManager::DiskManager(const string& filename) {
-  LOG_DEBUG("Temporary file for compaction:", filename);
-  db_file_ = filename;
-  InitDbFileImpl();
-}
-
-void DiskManager::InitDbFileImpl() {
-  db_io_.open(db_file_, std::ios::binary | std::ios::trunc | std::ios::out);
-  db_io_.close();
-  // reopen with original mode
-  db_io_.open(db_file_, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
-  if (!db_io_.is_open()) {
-    LOG_ERROR("cannot open db file");
-  }
-}
-
-// Compaction would remove SSTable files, and should be reinitialized when Run re-access them.
-void DiskManager::ReinitDbFile() {
-  LOG_DEBUG("Reinitialize db file ", db_file_);
-  InitDbFileImpl();
-}
-
+// TODO: remove WAL and temporary SSTable for recovery
 DiskManager::~DiskManager() {
   if (log_io_.is_open()) {
     log_io_.close();
   }
   if (db_io_.is_open()) {
     db_io_.close();
+  }
+  if (temp_io_.is_open()) {
+    temp_io_.close();
   }
 }
 
@@ -80,54 +59,63 @@ void DiskManager::WriteLog(char *log_data, int size) {
   if (size == 0) {
     return;
   }
-  log_io_.write(log_data, size);
-
-  // check for I/O error
-  if (log_io_.bad()) {
-    LOG_ERROR("I/O error while writing log");
-    return;
-  }
-  // needs to flush to keep disk file in sync
-  log_io_.flush();
+  WriteFileImpl(&log_io_, log_data, size);
 }
 
-// @param size could be 0 just to reinitialize I/O stream after compaction
 void DiskManager::WriteDb(char *db_data, int size) {
-  assert(db_data != nullptr || size == 0);
+  assert(db_data != nullptr);
+  assert(temp_io_.is_open());
   if (size == 0) {
-    assert(!db_io_.is_open());
-    ReinitDbFile();
     return;
   }
-  db_io_.seekg(0, db_io_.beg);  // reset file offset to the beginning
-  db_io_.write(db_data, size);
+  WriteFileImpl(&temp_io_, db_data, size);
+}
 
-  // check for I/O error
-  if (db_io_.bad()) {
-    LOG_ERROR("I/O error while writing log");
+void DiskManager::WriteDb(char *db_data, int size, int level, int run) {
+  assert(db_data != nullptr);
+  assert(db_io_.is_open());
+  if (size == 0) {
     return;
   }
-  // needs to flush to keep disk file in sync
-  db_io_.flush();
+  db_io_.seekp(GetRunIndex(level, run) * PAGE_SIZE);
+  WriteFileImpl(&db_io_, db_data, size);
 }
 
-// Read at the page granularity.
-void DiskManager::ReadDb(Bloom *filter, memtable_t *memtable) {
-  assert(db_io_.is_open());
-  char *page_data = new char[PAGE_SIZE];  // NOTE: page_data will be de-allocated within Page::Page
-  db_io_.seekg(0, db_io_.beg);  // reset file offset to the beginning
-  db_io_.read(page_data, PAGE_SIZE);
-  if (db_io_.bad()) {
-    LOG_ERROR("I/O error while reading db data");
+void DiskManager::WriteFileImpl(fstream *io, char *data, int size) {
+  io->write(data, size);
+  if (io->bad()) {
+    LOG_ERROR("I/O error while writing data");
   }
-  Page page(page_data);
-  page.GetMemtable(filter, memtable);
+  io->flush();
 }
 
-void DiskManager::RemoveTable() {
+void DiskManager::ReadLog(char *page, int size) {
+  assert(page != nullptr);
+  assert(log_io_.is_open());
+  log_io_.seekg(0, log_io_.beg);  // reset file offset to the beginning
+  ReadFileImpl(&log_io_, page, size);
+}
+
+void DiskManager::ReadDb(char *page) {
+  assert(page != nullptr);
+  assert(temp_io_.is_open());
+  temp_io_.seekg(0, temp_io_.beg);  // reset file offset to the beginning
+  ReadFileImpl(&temp_io_, page, PAGE_SIZE);
+}
+
+void DiskManager::ReadDb(char *page, int level, int run) {
+  assert(page != nullptr);
   assert(db_io_.is_open());
-  db_io_.close();
-  RemoveFile(db_file_.c_str());
+  db_io_.seekp(GetRunIndex(level, run) * PAGE_SIZE);
+  ReadFileImpl(&db_io_, page, PAGE_SIZE);
+}
+
+void DiskManager::ReadFileImpl(fstream *io, char *data, int size) {
+  io->read(data, size);
+  if (io->bad()) {
+    LOG_ERROR("I/O error while reading data");
+  }
+  io->flush();
 }
 
 }  // namespace ghostdb

@@ -26,13 +26,12 @@ namespace ghostdb {
 
 class Run {
  public:
-  Run(int level, int run);
+  Run(int level, int run, DiskManager *disk_manager);
   bool IsEmpty() const { return is_empty_; }
+  void ClearSSTable();
   template<typename Cont>
-  bool DumpTable(const Cont& memtable);
-  void LoadTable(Bloom *filter, memtable_t *memtable);
-  void RemoveTable();
-  void MergeSSTableTo();
+  bool DumpSSTable(const Cont& memtable);
+  void LoadSSTable(Bloom *filter, memtable_t *memtable);
 
  private:
   int level_;
@@ -40,7 +39,7 @@ class Run {
   bool is_empty_;  // whether there's corresponding SSTable
   int32_t kv_num_;  // # of key-value pairs in the SSTable
   Bloom bloom_filter_;
-  std::unique_ptr<DiskManager> disk_manager_;
+  DiskManager *disk_manager_;
 };
 
 }  // namespace ghostdb

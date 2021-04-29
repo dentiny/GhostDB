@@ -20,6 +20,7 @@
 #include "common.h"
 #include "compaction_manager.h"
 #include "config.h"
+#include "disk_manager.h"
 #include "level.h"
 #include "logger.h"
 #include "log_manager.h"
@@ -39,6 +40,8 @@ class GhostDB {
   bool GetAvaiRun(int *level_no, int *run_no) const;
 
  private:
+  /** DB owns one single DiskManager for both WAL and SSTable */
+  std::unique_ptr<DiskManager> disk_manager_;
   /** DB holds exactly one currently-using buffer */
   std::unique_ptr<Buffer> buffer_;
   /** manages SSTable dumping and loading */

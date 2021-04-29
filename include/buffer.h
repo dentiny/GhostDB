@@ -18,6 +18,7 @@
 
 #include "common.h"
 #include "config.h"
+#include "disk_manager.h"
 #include "logger.h"
 #include "log_manager.h"
 
@@ -29,7 +30,7 @@ class Buffer {
   friend class GhostDB;
 
  public:
-  explicit Buffer(uint32_t buffer_size);
+  explicit Buffer(uint32_t buffer_size, DiskManager *disk_manager);
   bool Put(Key key, Val val);
   bool Get(Key key, Val **val);
   void ClearKV() { kv_.clear(); }

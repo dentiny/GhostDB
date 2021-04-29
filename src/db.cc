@@ -27,8 +27,9 @@ namespace ghostdb {
 GhostDB::GhostDB() {
   InitDirectory(db_base);  // make sure db_base exists at the very beginning of set-up
   LOG_DEBUG("Open db at ", db_base);
-  buffer_ = make_unique<Buffer>(MAX_BUFFER_SIZE);
-  sstable_manager_ = make_unique<SSTableManager>();
+  disk_manager_ = make_unique<DiskManager>();
+  buffer_ = make_unique<Buffer>(MAX_BUFFER_SIZE, disk_manager_.get());
+  sstable_manager_ = make_unique<SSTableManager>(disk_manager_.get());
   compaction_manager_ = make_unique<CompactionManager>(sstable_manager_.get());
 }
 
@@ -47,10 +48,11 @@ bool GhostDB::Put(Key key, Val val) {
 
   LOG_DEBUG("memtable full, dump memtable into SSTable");
   buffer_->log_manager_->Flush();
-  while (!sstable_manager_->DumpTable(buffer_->kv_)) {
+  while (!sstable_manager_->DumpSSTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
-    LOG_DEBUG("Minor compaction completes.");
+    break;  // TODO
   }
+  LOG_DEBUG("Minor compaction completes.");
   buffer_->ClearKV();
   Put(key, val);
   return true;
@@ -75,7 +77,7 @@ bool GhostDB::Delete(Key key) {
 
 GhostDB::~GhostDB() {
   LOG_DEBUG("Exit GhostDB, place buffer into SSTable");
-  while (!sstable_manager_->DumpTable(buffer_->kv_)) {
+  while (!sstable_manager_->DumpSSTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
   }
 }

@@ -22,9 +22,7 @@
 #include <cstring>
 #include <fstream>
 #include <map>
-#include <string>
 
-#include "bloom.h"
 #include "common.h"
 #include "config.h"
 #include "logger.h"
@@ -33,24 +31,24 @@ namespace ghostdb {
 
 class DiskManager {
  public:
-  DiskManager();  // memtable WAL
-  DiskManager(int level, int run);  // SSTable
-  DiskManager(const std::string& filename);  // temporary file for compaction
+  DiskManager();
   ~DiskManager() noexcept;
-  void ReinitDbFile();
   void WriteLog(char *log_data, int size);
   void WriteDb(char *db_data, int size);
-  void ReadDb(Bloom *filter, memtable_t *memtable);
-  void RemoveTable();
+  void WriteDb(char *db_data, int size, int level, int run);
+  void ReadLog(char *log_data, int size);
+  void ReadDb(char *page_data);
+  void ReadDb(char *page_data, int level, int run);
 
  private:
-  void InitDbFileImpl();
+  void InitFileIOImpl(std::fstream *io, const std::string& filename);
+  void WriteFileImpl(std::fstream *io, char *data, int size);
+  void ReadFileImpl(std::fstream *io, char *data, int size);
 
  private:
-  /** DiskManager works on one file, bookkeeping for reinitialization */
-  std::string db_file_;
   std::fstream log_io_;  // WAL
   std::fstream db_io_;  // SSTable
+  std::fstream temp_io_;  // temporary file for compaction
 };
 
 }  // namespace ghostdb

@@ -19,9 +19,9 @@ using std::make_unique;
 
 namespace ghostdb {
 
-Buffer::Buffer(uint32_t buffer_size) :
+Buffer::Buffer(uint32_t buffer_size, DiskManager *disk_manager) :
   buffer_size_(buffer_size),
-  log_manager_(make_unique<LogManager>()) {}
+  log_manager_(make_unique<LogManager>(disk_manager)) {}
 
 /*
  * @return: true for place succeeds in buffer, false for buffer full
