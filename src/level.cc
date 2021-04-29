@@ -13,9 +13,11 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <type_traits>
 
 #include "level.h"
 
+using std::is_same_v;
 using std::make_unique;
 using std::map;
 using std::pair;
@@ -47,8 +49,13 @@ void Level::ClearSSTable(int run_no) {
 }
 
 template<typename Cont>
-bool Level::DumpSSTable(int run_no, const Cont& memtable) {
-  assert(runs_[run_no] == nullptr || runs_[run_no]->IsEmpty());
+bool Level::DumpSSTable(int run_no, const Cont& memtable) {  
+  // When dumping temporary compaction SSTable files(whether minor or major), there's
+  // no guarentee whether the run is empty.
+  if constexpr (is_same_v<map<Key, Val>, Cont>) {
+    assert(runs_[run_no] == nullptr || runs_[run_no]->IsEmpty());
+  }
+
   if (runs_[run_no] == nullptr) {
     runs_[run_no] = make_unique<Run>(level_, run_no, disk_manager_);
   }

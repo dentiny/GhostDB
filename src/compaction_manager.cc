@@ -10,6 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <cassert>
 #include <map>
 #include <string>
 
@@ -107,6 +108,7 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
     for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
       if (sstable_manager_->IsEmpty(level_no, run_no)) {
         is_run_avai = false;
+        break;
       }
       Bloom bloom_filter;
       memtable_t sstable_kv;
@@ -129,6 +131,7 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
     for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
       if (sstable_manager_->IsEmpty(level_no, run_no)) {
         is_run_avai = false;
+        break;
       }
       sstable_manager_->ClearSSTable(level_no, run_no);
     }
