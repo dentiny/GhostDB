@@ -30,7 +30,7 @@ class Run {
   bool IsEmpty() const { return is_empty_; }
   void ClearSSTable();
   template<typename Cont>
-  bool DumpSSTable(const Cont& memtable);
+  bool DumpSSTable(const Cont& memtable, bool for_temp_table);
   void LoadSSTable(Bloom *filter, memtable_t *memtable);
 
  private:

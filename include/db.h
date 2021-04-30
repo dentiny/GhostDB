@@ -10,6 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+/*
+ * There're three files related to GhostDB:
+ * 1. memtable.log
+ * 2. sstable.db
+ * 3. sstable.temp
+ */
+
 #pragma once
 
 #include <cstdint>

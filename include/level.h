@@ -38,7 +38,7 @@ class Level {
   int GetAvaiRun() const;
   void ClearSSTable(int run_no);
   template<typename Cont>
-  bool DumpSSTable(int run_no, const Cont& memtable);
+  bool DumpSSTable(int run_no, const Cont& memtable, bool for_temp_table = false);
   void LoadSSTable(int run_no, Bloom *filter, memtable_t *memtable);
   bool IsEmpty(int run_no) const;
 

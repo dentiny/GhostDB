@@ -80,7 +80,7 @@ void SSTableManager::DumpSSTable(int level_no, int run_no, const memtable_t& mem
 // Leverage Run::DumpSSTable infrastructure to decode memtable, thus use
 // level=MAX_LEVEL_NUM-1, run=0, which is guarenteed to exist.
 void SSTableManager::DumpTempSSTable(const memtable_t& memtable) {
-  levels_[MAX_LEVEL_NUM - 1]->DumpSSTable(0 /* run */, memtable);
+  levels_[MAX_LEVEL_NUM - 1]->DumpSSTable(0 /* run */, memtable, true /* for_temp_table */);
 }
 
 void SSTableManager::LoadSSTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable) {

@@ -54,13 +54,20 @@ DiskManager::~DiskManager() {
   }
 }
 
-void DiskManager::WriteLog(char *log_data, int size) {
+// WAL'll be cleared after memtable is dumped into SSTable.
+void DiskManager::WriteLog(char *log_data, int size, bool is_delete) {
   assert(log_data != nullptr);
   assert(log_io_.is_open());
   if (size == 0) {
     return;
   }
+  if (is_delete) {
+    log_io_.seekp(0);
+  }
   WriteFileImpl(&log_io_, log_data, size);
+  if (is_delete) {
+    log_io_.seekp(0);
+  }
 }
 
 void DiskManager::WriteDb(char *db_data, int size) {
@@ -69,6 +76,7 @@ void DiskManager::WriteDb(char *db_data, int size) {
   if (size == 0) {
     return;
   }
+  temp_io_.seekp(0);
   WriteFileImpl(&temp_io_, db_data, size);
 }
 

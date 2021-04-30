@@ -33,7 +33,7 @@ class DiskManager {
  public:
   DiskManager();
   ~DiskManager() noexcept;
-  void WriteLog(char *log_data, int size);
+  void WriteLog(char *log_data, int size, bool is_delete = false);
   void WriteDb(char *db_data, int size);
   void WriteDb(char *db_data, int size, int level, int run);
   void ReadLog(char *log_data, int size);

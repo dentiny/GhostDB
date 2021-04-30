@@ -52,4 +52,8 @@ bool Buffer::Get(Key key, Val **val) {
   return false;
 }
 
+void Buffer::FlushWAL() {
+  log_manager_->Flush();
+}
+
 }  // namespace ghostdb

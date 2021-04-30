@@ -47,10 +47,12 @@ bool GhostDB::Put(Key key, Val val) {
   }
 
   LOG_DEBUG("memtable full, dump memtable into SSTable");
-  buffer_->log_manager_->Flush();
+  buffer_->FlushWAL();
   while (!sstable_manager_->DumpSSTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
   }
+  char zero_data[PAGE_SIZE] = { 0 };
+  disk_manager_->WriteLog(zero_data, PAGE_SIZE, true /* is_delete */);
   buffer_->ClearKV();
   Put(key, val);
   return true;
@@ -73,11 +75,19 @@ bool GhostDB::Delete(Key key) {
   return Put(key, TOMBSTOME);
 }
 
+/*
+ * 1. Dump buffer into WAL, then SSTable file.
+ * 2. Perform major compaction at destructor at ~CompactionManager.
+ * 3. Clear WAL file, considering RecoveryManager.
+ */
 GhostDB::~GhostDB() {
   LOG_DEBUG("Exit GhostDB, place buffer into SSTable");
+  buffer_->FlushWAL();
   while (!sstable_manager_->DumpSSTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
   }
+  char zero_data[PAGE_SIZE] = { 0 };
+  disk_manager_->WriteLog(zero_data, PAGE_SIZE, true /* is_delete */);
 }
 
 }  // namespace ghostdb

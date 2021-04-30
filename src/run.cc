@@ -51,7 +51,7 @@ void Run::ClearSSTable() {
 // About page layout, reference to: page.h
 // TODO: currently don't consider the situation memtable demands more than one page, set has_next_page = 0
 template<typename Cont>
-bool Run::DumpSSTable(const Cont& memtable) {
+bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
   is_empty_ = false;
   size_t offset = 0;
   char page_data[PAGE_SIZE] = { 0 };
@@ -80,13 +80,19 @@ bool Run::DumpSSTable(const Cont& memtable) {
   // TODO: total storage space needed is related to MAX_BUFFER_SIZE(cannot exceed PAGE_SIZE), currently doesn't support next_page_id.
   string kv = MemtableToString(memtable);
   memmove(page_data + offset, kv.c_str(), kv.size());
-  disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
+
+  // For temporary SSTable files before dumping into the SSTable file.
+  if (for_temp_table) {
+    disk_manager_->WriteDb(page_data, PAGE_SIZE);
+  } else {
+    disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
+  }
   return true;
 }
 
 // Explicit instantiation to export symbol.
-template bool Run::DumpSSTable(const vector<pair<Key, Val>>& memtable);
-template bool Run::DumpSSTable(const map<Key, Val>& memtable);
+template bool Run::DumpSSTable(const vector<pair<Key, Val>>& memtable, bool for_temp_table);
+template bool Run::DumpSSTable(const map<Key, Val>& memtable, bool for_temp_table);
 
 void Run::LoadSSTable(Bloom *filter, memtable_t *memtable) {
   assert(!is_empty_);

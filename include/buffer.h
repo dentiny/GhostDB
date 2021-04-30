@@ -34,6 +34,7 @@ class Buffer {
   bool Put(Key key, Val val);
   bool Get(Key key, Val **val);
   void ClearKV() { kv_.clear(); }
+  void FlushWAL();
 
  private:
   uint32_t buffer_size_;

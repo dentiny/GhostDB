@@ -119,7 +119,7 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
   }
 
   // Check whether there's SSTable to compact
-  if (memtable.empty()) {
+  if (memtable.size() <= 1) {
     LOG_DEBUG("there's no SSTable to compact");
     return;
   }
