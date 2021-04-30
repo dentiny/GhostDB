@@ -68,6 +68,17 @@ string GetFilename(int level, int run) {
   return string(filename);
 }
 
+// Invoked at Page::ParsePageData
+bool IsPageAllZero(const char *page_data) {
+  for (int idx = 0; idx < PAGE_SIZE; ++idx) {
+    if (page_data[idx] != 0) {
+      LOG_DEBUG("index:", idx, " is not zero");
+      return false;
+    }
+  }
+  return true;
+}
+
 void RemoveDirectory(const char *path) {
   char cmd[INIT_CMD_LENGTH] = { 0 };
   snprintf(cmd, sizeof(cmd), "rm -rf %s", path);
@@ -118,7 +129,7 @@ int GetMaxRun(int level) {
   return (level + 1) * MAX_RUN_PER_LEVEL;
 }
 
-int GetRunIndex(int level, int run) {
+int GetPageId(int level, int run) {
   return level * (level + 1) * MAX_RUN_PER_LEVEL / 2 + run;
 }
 
@@ -128,7 +139,7 @@ bool GetLevelRunNo(int32_t page_id, int *level, int *run) {
   for (int level_id = 0; level_id < MAX_LEVEL_NUM; ++level_id) {
     int cur_max_run = GetMaxRun(level_id);
     for (int run_id = 0; run_id < cur_max_run; ++run_id) {
-      if (GetRunIndex(level_id, run_id) == page_id) {
+      if (GetPageId(level_id, run_id) == page_id) {
         *level = level_id;
         *run = run_id;
         return true;

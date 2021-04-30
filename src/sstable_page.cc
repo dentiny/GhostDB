@@ -21,7 +21,12 @@ namespace ghostdb {
 SSTablePage::SSTablePage() :
   kv_num_(-1) {}
 
-void SSTablePage::ParsePageData() {
+// @return: is page all zero
+bool SSTablePage::ParsePageData() {
+  if (IsPageAllZero(data_)) {
+    return true;
+  }
+
   size_t offset = 0;
 
   // Read magic number and has_next_page.
@@ -59,6 +64,7 @@ void SSTablePage::ParsePageData() {
     memtable_.emplace_back(key, val);
   }
   assert(kv_num_ == static_cast<int32_t>(memtable_.size()));  
+  return false;
 }
 
 }  // namespace ghostdb

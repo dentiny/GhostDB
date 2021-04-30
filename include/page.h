@@ -31,7 +31,7 @@
 namespace ghostdb {
 
 class Page {
-  // Run could access content in the page.
+  friend class RecoveryManager;
   friend class Run;
 
   // Check page layout

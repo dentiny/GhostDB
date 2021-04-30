@@ -15,6 +15,7 @@
 #include <string>
 
 #include "db.h"
+#include "recovery_manager.h"
 #include "util.h"
 
 using std::fstream;
@@ -28,6 +29,8 @@ GhostDB::GhostDB() {
   InitDirectory(db_base);  // make sure db_base exists at the very beginning of set-up
   LOG_DEBUG("Open db at ", db_base);
   disk_manager_ = make_unique<DiskManager>();
+  RecoveryManager recovery_manager(disk_manager_.get());
+  recovery_manager.PerformRecover();
   buffer_ = make_unique<Buffer>(MAX_BUFFER_SIZE, disk_manager_.get());
   sstable_manager_ = make_unique<SSTableManager>(disk_manager_.get());
   compaction_manager_ = make_unique<CompactionManager>(sstable_manager_.get());

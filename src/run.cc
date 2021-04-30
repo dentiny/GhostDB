@@ -39,12 +39,16 @@ Run::Run(int level, int run, DiskManager *disk_manager) :
   is_empty_(true),
   disk_manager_(disk_manager) {
   assert(level < MAX_LEVEL_NUM && run < GetMaxRun(level));
+  SSTablePage sstable_page;
+  disk_manager_->ReadDb(sstable_page.data_, GetPageId(level_, run_));
+  is_empty_ = sstable_page.ParsePageData();
+  LOG_DEBUG("Run(", level_, ", ", run_, ")", is_empty_ ? " is empty" : "is not empty");
 }
 
 void Run::ClearSSTable() {
   assert(!is_empty_);
   is_empty_ = true;
-  disk_manager_->WriteDb(zero_data, PAGE_SIZE, level_, run_);
+  disk_manager_->WriteDb(zero_data, PAGE_SIZE, GetPageId(level_, run_));
 }
 
 // About page layout, reference to: page.h
@@ -65,7 +69,7 @@ bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
   offset += sizeof(kv_num_);
 
   // Dump page id.
-  int32_t page_id = GetRunIndex(level_, run_);
+  int32_t page_id = GetPageId(level_, run_);
   memmove(page_data + offset, &page_id, sizeof(page_id));
   offset += sizeof(page_id);
 
@@ -89,7 +93,7 @@ bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
   if (for_temp_table) {
     disk_manager_->WriteDb(page_data, PAGE_SIZE);
   } else {
-    disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
+    disk_manager_->WriteDb(page_data, PAGE_SIZE, GetPageId(level_, run_));
   }
   return true;
 }
@@ -101,7 +105,7 @@ template bool Run::DumpSSTable(const buffer_t& memtable, bool for_temp_table);
 void Run::LoadSSTable(Bloom *filter, sstable_t *memtable) {
   assert(!is_empty_);
   SSTablePage sstable_page;
-  disk_manager_->ReadDb(sstable_page.data_, level_, run_);
+  disk_manager_->ReadDb(sstable_page.data_, GetPageId(level_, run_));
   sstable_page.ParsePageData();
   *filter = sstable_page.GetBloomFilter();
   sstable_page.GetMemtable(memtable);

@@ -25,7 +25,11 @@ namespace ghostdb {
 
 SSTableManager::SSTableManager(DiskManager *disk_manager) :
   disk_manager_(disk_manager),
-  levels_(vector<unique_ptr<Level>>(MAX_LEVEL_NUM)) {}
+  levels_(vector<unique_ptr<Level>>(MAX_LEVEL_NUM)) {
+  for (int level_no = 0; level_no < MAX_LEVEL_NUM; ++level_no) {
+    levels_[level_no] = make_unique<Level>(level_no, disk_manager_);
+  }
+}
 
 /*
  * Policy for dumping SSTable:
@@ -38,12 +42,6 @@ SSTableManager::SSTableManager(DiskManager *disk_manager) :
  */
 bool SSTableManager::GetAvaiRun(int *level_no, int *run_no) const {
   for (int idx = MAX_LEVEL_NUM - 1; idx >= 0; --idx) {
-    if (levels_[idx] == nullptr) {
-      *level_no = idx;
-      *run_no = -1;
-      LOG_DEBUG("Could persist to level ", *level_no, ", run 0");
-      return true;
-    }
     int avai_run = levels_[idx]->GetAvaiRun();
     if (avai_run != -1) {
       *level_no = idx;
@@ -62,10 +60,6 @@ bool SSTableManager::DumpSSTable(const buffer_t& memtable) {
   int run_no = -1;
   bool can_dump = GetAvaiRun(&level_no, &run_no);
   if (can_dump) {
-    if (levels_[level_no] == nullptr) {
-      levels_[level_no] = make_unique<Level>(level_no, disk_manager_);
-      run_no = 0;
-    }
     levels_[level_no]->DumpSSTable(run_no, memtable);
     return true;
   }
@@ -73,7 +67,6 @@ bool SSTableManager::DumpSSTable(const buffer_t& memtable) {
 }
 
 void SSTableManager::DumpSSTable(int level_no, int run_no, const sstable_t& memtable) {
-  assert(levels_[level_no] != nullptr);
   levels_[level_no]->DumpSSTable(run_no, memtable);
 }
 
@@ -84,7 +77,6 @@ void SSTableManager::DumpTempSSTable(const sstable_t& memtable) {
 }
 
 void SSTableManager::LoadSSTable(int level_no, int run_no, Bloom *filter, sstable_t *memtable) {
-  assert(levels_[level_no] != nullptr);
   levels_[level_no]->LoadSSTable(run_no, filter, memtable);
 }
 
@@ -93,12 +85,11 @@ void SSTableManager::ClearTempSSTable() {
 }
 
 void SSTableManager::ClearSSTable(int level_no, int run_no) {
-  assert(levels_[level_no] != nullptr);
   levels_[level_no]->ClearSSTable(run_no);
 }
 
 bool SSTableManager::IsEmpty(int level_no, int run_no) const {
-  return levels_[level_no] == nullptr || levels_[level_no]->IsEmpty(run_no);
+  return levels_[level_no]->IsEmpty(run_no);
 }
 
 }  // namespace ghostdb

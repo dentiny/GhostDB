@@ -24,7 +24,7 @@ class SSTablePage : public Page {
  public:
   SSTablePage();
   ~SSTablePage() = default;
-  void ParsePageData();
+  bool ParsePageData();
   inline int GetLevel() const { return level_; }
   inline int GetRun() const { return run_; }
   inline int32_t GetKvNum() const { return kv_num_; }
