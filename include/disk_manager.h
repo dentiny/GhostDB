@@ -33,16 +33,16 @@ class DiskManager {
  public:
   DiskManager();
   ~DiskManager() noexcept;
-  void WriteLog(char *log_data, int size, bool is_delete = false);
-  void WriteDb(char *db_data, int size);
-  void WriteDb(char *db_data, int size, int level, int run);
+  void WriteLog(const char *log_data, int size, bool is_delete = false);
+  void WriteDb(const char *db_data, int size);
+  void WriteDb(const char *db_data, int size, int level, int run);
   void ReadLog(char *log_data, int size);
   void ReadDb(char *page_data);
   void ReadDb(char *page_data, int level, int run);
 
  private:
   void InitFileIOImpl(std::fstream *io, const std::string& filename);
-  void WriteFileImpl(std::fstream *io, char *data, int size);
+  void WriteFileImpl(std::fstream *io, const char *data, int size);
   void ReadFileImpl(std::fstream *io, char *data, int size);
 
  private:

@@ -19,7 +19,7 @@ namespace ghostdb {
 SSTablePage::SSTablePage() :
   kv_num_(-1) {}
 
-void SSTablePage::GetMemtable(Bloom *bloom_filter, memtable_t *memtable) {
+void SSTablePage::GetMemtable(Bloom *bloom_filter, sstable_t *memtable) {
   size_t offset = 0;
 
   // Read magic number and has_next_page.

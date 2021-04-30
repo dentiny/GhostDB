@@ -24,12 +24,12 @@ class SSTablePage : public Page {
  public:
   SSTablePage();
   ~SSTablePage() = default;
-  void GetMemtable(Bloom *filter, memtable_t *memtable);
+  void GetMemtable(Bloom *filter, sstable_t *memtable);
 
  private:
   int32_t kv_num_;
   Bloom bloom_filter_;
-  memtable_t memtable_;
+  sstable_t memtable_;
 };
 
 }  // namespace ghostdb

@@ -55,8 +55,8 @@ string MemtableToString(const Cont& memtable) {
 }
 
 // Explicit instantiation to export symbol.
-template string MemtableToString(const vector<pair<Key, Val>>& memtable);
-template string MemtableToString(const map<Key, Val>& memtable);
+template string MemtableToString(const sstable_t& memtable);
+template string MemtableToString(const buffer_t& memtable);
 
 string GetFilename(int level, int run) {
   int db_base_len = strlen(db_base);
@@ -121,8 +121,8 @@ int GetRunIndex(int level, int run) {
   return level * (level + 1) * MAX_RUN_PER_LEVEL / 2 + run;
 }
 
-memtable_t MergeSSTable(const memtable_t& new_sstable, const memtable_t& old_sstable) {
-  memtable_t merged_sstable;
+sstable_t MergeSSTable(const sstable_t& new_sstable, const sstable_t& old_sstable) {
+  sstable_t merged_sstable;
   size_t size1 = new_sstable.size();
   size_t size2 = old_sstable.size();
   size_t idx1 = 0;

@@ -55,7 +55,7 @@ DiskManager::~DiskManager() {
 }
 
 // WAL'll be cleared after memtable is dumped into SSTable.
-void DiskManager::WriteLog(char *log_data, int size, bool is_delete) {
+void DiskManager::WriteLog(const char *log_data, int size, bool is_delete) {
   assert(log_data != nullptr);
   assert(log_io_.is_open());
   if (size == 0) {
@@ -70,7 +70,7 @@ void DiskManager::WriteLog(char *log_data, int size, bool is_delete) {
   }
 }
 
-void DiskManager::WriteDb(char *db_data, int size) {
+void DiskManager::WriteDb(const char *db_data, int size) {
   assert(db_data != nullptr);
   assert(temp_io_.is_open());
   if (size == 0) {
@@ -80,7 +80,7 @@ void DiskManager::WriteDb(char *db_data, int size) {
   WriteFileImpl(&temp_io_, db_data, size);
 }
 
-void DiskManager::WriteDb(char *db_data, int size, int level, int run) {
+void DiskManager::WriteDb(const char *db_data, int size, int level, int run) {
   assert(db_data != nullptr);
   assert(db_io_.is_open());
   if (size == 0) {
@@ -90,7 +90,7 @@ void DiskManager::WriteDb(char *db_data, int size, int level, int run) {
   WriteFileImpl(&db_io_, db_data, size);
 }
 
-void DiskManager::WriteFileImpl(fstream *io, char *data, int size) {
+void DiskManager::WriteFileImpl(fstream *io, const char *data, int size) {
   io->write(data, size);
   if (io->bad()) {
     LOG_ERROR("I/O error while writing data");

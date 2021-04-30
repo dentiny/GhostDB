@@ -13,6 +13,7 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -34,6 +35,7 @@ using sstable_id_t = int;
  * When reading key-value pair from storage, since they're already sorted while dumping,
  * keeping them in the vector is enough for merging and binary search.
  */
-using memtable_t = std::vector<MappingType>;
+using buffer_t = std::map<Key, Val>;
+using sstable_t = std::vector<MappingType>;
 
 }  // namespace ghostdb

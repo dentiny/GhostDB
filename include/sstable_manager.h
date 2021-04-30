@@ -30,10 +30,10 @@ class SSTableManager {
   ~SSTableManager() = default;
   void ClearTempSSTable();
   void ClearSSTable(int level_no, int run_no);
-  bool DumpSSTable(const std::map<Key, Val>& memtable);
-  void DumpSSTable(int level, int run, const memtable_t& memtable);
-  void DumpTempSSTable(const std::vector<std::pair<Key, Val>>& memtable);
-  void LoadSSTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable);
+  bool DumpSSTable(const buffer_t& memtable);
+  void DumpSSTable(int level, int run, const sstable_t& memtable);
+  void DumpTempSSTable(const sstable_t& memtable);
+  void LoadSSTable(int level_no, int run_no, Bloom *filter, sstable_t *memtable);
   bool IsEmpty(int level_no, int run_no) const;
 
  private:

@@ -51,7 +51,6 @@ bool GhostDB::Put(Key key, Val val) {
   while (!sstable_manager_->DumpSSTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
   }
-  char zero_data[PAGE_SIZE] = { 0 };
   disk_manager_->WriteLog(zero_data, PAGE_SIZE, true /* is_delete */);
   buffer_->ClearKV();
   Put(key, val);
@@ -86,7 +85,6 @@ GhostDB::~GhostDB() {
   while (!sstable_manager_->DumpSSTable(buffer_->kv_)) {
     compaction_manager_->RequestMinorCompaction();
   }
-  char zero_data[PAGE_SIZE] = { 0 };
   disk_manager_->WriteLog(zero_data, PAGE_SIZE, true /* is_delete */);
 }
 

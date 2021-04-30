@@ -104,7 +104,7 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
   bool is_run_avai = true;  // to get out of the double loop
 
   // 1. Load SSTable pages and compact them in the memory
-  memtable_t memtable;
+  sstable_t memtable;
   for (int level_no = start_level_no; is_run_avai && level_no >= 0; --level_no) {
     for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
       if (sstable_manager_->IsEmpty(level_no, run_no)) {
@@ -112,7 +112,7 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
         break;
       }
       Bloom bloom_filter;
-      memtable_t sstable_kv;
+      sstable_t sstable_kv;
       sstable_manager_->LoadSSTable(level_no, run_no, &bloom_filter, &sstable_kv);
       memtable = MergeSSTable(sstable_kv /* new */, memtable /* old */);
     }

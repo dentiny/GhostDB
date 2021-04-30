@@ -18,6 +18,7 @@
 #include <string>
 
 #include "common.h"
+#include "consts.h"
 
 /* rounds up to the nearest multiple of WORD_SIZE */
 #define ALIGNMENT sizeof(size_t)
@@ -35,8 +36,6 @@ static constexpr std::chrono::duration<int64_t> COMPACTION_TIMEOUT = std::chrono
 static constexpr Val TOMBSTOME = std::numeric_limits<Val>::min();
 /** minor compaction merges uppermost two levels */
 static constexpr int MINOR_COMPACTION_LEVEL_NUM = 2;
-/** page size */
-static constexpr int PAGE_SIZE = 1024;
 /** magic number in page header */
 static constexpr uint8_t PAGE_HEADER_MAGIC = 0xAA;  // 0b1010,1010
 /** max level # */

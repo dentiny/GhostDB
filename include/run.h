@@ -31,7 +31,7 @@ class Run {
   void ClearSSTable();
   template<typename Cont>
   bool DumpSSTable(const Cont& memtable, bool for_temp_table);
-  void LoadSSTable(Bloom *filter, memtable_t *memtable);
+  void LoadSSTable(Bloom *filter, sstable_t *memtable);
 
  private:
   int level_;

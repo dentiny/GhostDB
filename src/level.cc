@@ -52,7 +52,7 @@ template<typename Cont>
 bool Level::DumpSSTable(int run_no, const Cont& memtable, bool for_temp_table) {  
   // When dumping temporary compaction SSTable files(whether minor or major), there's
   // no guarentee whether the run is empty.
-  if constexpr (is_same_v<map<Key, Val>, Cont>) {
+  if constexpr (is_same_v<buffer_t, Cont>) {
     assert(runs_[run_no] == nullptr || runs_[run_no]->IsEmpty());
   }
 
@@ -64,10 +64,10 @@ bool Level::DumpSSTable(int run_no, const Cont& memtable, bool for_temp_table) {
 }
 
 // Explicit instantiation to export symbol.
-template bool Level::DumpSSTable(int run_no, const vector<pair<Key, Val>>& memtable, bool for_temp_table);
-template bool Level::DumpSSTable(int run_no, const map<Key, Val>& memtable, bool for_temp_table);
+template bool Level::DumpSSTable(int run_no, const sstable_t& memtable, bool for_temp_table);
+template bool Level::DumpSSTable(int run_no, const buffer_t& memtable, bool for_temp_table);
 
-void Level::LoadSSTable(int run_no, Bloom *filter, memtable_t *memtable) {
+void Level::LoadSSTable(int run_no, Bloom *filter, sstable_t *memtable) {
   assert(runs_[run_no] != nullptr && !runs_[run_no]->IsEmpty());
   runs_[run_no]->LoadSSTable(filter, memtable);
 }

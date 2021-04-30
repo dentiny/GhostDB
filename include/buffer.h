@@ -38,7 +38,7 @@ class Buffer {
 
  private:
   uint32_t buffer_size_;
-  std::map<Key, Val> kv_;
+  buffer_t kv_;
   /** log_manager for buffer WAL */
   std::unique_ptr<LogManager> log_manager_;
 };

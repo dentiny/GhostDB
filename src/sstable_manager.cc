@@ -57,7 +57,7 @@ bool SSTableManager::GetAvaiRun(int *level_no, int *run_no) const {
 }
 
 // @return: true for dump succeeds, false for no available run, minor compaction needed
-bool SSTableManager::DumpSSTable(const map<Key, Val>& memtable) {
+bool SSTableManager::DumpSSTable(const buffer_t& memtable) {
   int level_no = -1;
   int run_no = -1;
   bool can_dump = GetAvaiRun(&level_no, &run_no);
@@ -72,25 +72,24 @@ bool SSTableManager::DumpSSTable(const map<Key, Val>& memtable) {
   return false;
 }
 
-void SSTableManager::DumpSSTable(int level_no, int run_no, const memtable_t& memtable) {
+void SSTableManager::DumpSSTable(int level_no, int run_no, const sstable_t& memtable) {
   assert(levels_[level_no] != nullptr);
   levels_[level_no]->DumpSSTable(run_no, memtable);
 }
 
 // Leverage Run::DumpSSTable infrastructure to decode memtable, thus use
 // level=MAX_LEVEL_NUM-1, run=0, which is guarenteed to exist.
-void SSTableManager::DumpTempSSTable(const memtable_t& memtable) {
+void SSTableManager::DumpTempSSTable(const sstable_t& memtable) {
   levels_[MAX_LEVEL_NUM - 1]->DumpSSTable(0 /* run */, memtable, true /* for_temp_table */);
 }
 
-void SSTableManager::LoadSSTable(int level_no, int run_no, Bloom *filter, memtable_t *memtable) {
+void SSTableManager::LoadSSTable(int level_no, int run_no, Bloom *filter, sstable_t *memtable) {
   assert(levels_[level_no] != nullptr);
   levels_[level_no]->LoadSSTable(run_no, filter, memtable);
 }
 
 void SSTableManager::ClearTempSSTable() {
-  char page_data[PAGE_SIZE] = { 0 };
-  disk_manager_->WriteDb(page_data, PAGE_SIZE);
+  disk_manager_->WriteDb(zero_data, PAGE_SIZE);
 }
 
 void SSTableManager::ClearSSTable(int level_no, int run_no) {

@@ -44,8 +44,7 @@ Run::Run(int level, int run, DiskManager *disk_manager) :
 void Run::ClearSSTable() {
   assert(!is_empty_);
   is_empty_ = true;
-  char page_data[PAGE_SIZE] = { 0 };
-  disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
+  disk_manager_->WriteDb(zero_data, PAGE_SIZE, level_, run_);
 }
 
 // About page layout, reference to: page.h
@@ -91,10 +90,10 @@ bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
 }
 
 // Explicit instantiation to export symbol.
-template bool Run::DumpSSTable(const vector<pair<Key, Val>>& memtable, bool for_temp_table);
-template bool Run::DumpSSTable(const map<Key, Val>& memtable, bool for_temp_table);
+template bool Run::DumpSSTable(const sstable_t& memtable, bool for_temp_table);
+template bool Run::DumpSSTable(const buffer_t& memtable, bool for_temp_table);
 
-void Run::LoadSSTable(Bloom *filter, memtable_t *memtable) {
+void Run::LoadSSTable(Bloom *filter, sstable_t *memtable) {
   assert(!is_empty_);
   SSTablePage sstable_page;
   disk_manager_->ReadDb(sstable_page.data_, level_, run_);
