@@ -77,15 +77,10 @@ bool Run::DumpSSTable(const Cont& memtable) {
   offset += sizeof(val_to_dump);
 
   // Dump key-value pairs.
+  // TODO: total storage space needed is related to MAX_BUFFER_SIZE(cannot exceed PAGE_SIZE), currently doesn't support next_page_id.
   string kv = MemtableToString(memtable);
   memmove(page_data + offset, kv.c_str(), kv.size());
-
-  // buffer dumps with map, compaction manager dumps with vector
-  if constexpr (is_same_v<map<Key, Val>, Cont>) {
-    disk_manager_->WriteDb(page_data, PAGE_SIZE);
-  } else {
-    disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
-  }
+  disk_manager_->WriteDb(page_data, PAGE_SIZE, level_, run_);
   return true;
 }
 
@@ -96,7 +91,7 @@ template bool Run::DumpSSTable(const map<Key, Val>& memtable);
 void Run::LoadSSTable(Bloom *filter, memtable_t *memtable) {
   assert(!is_empty_);
   SSTablePage sstable_page;
-  disk_manager_->ReadDb(sstable_page.data_);
+  disk_manager_->ReadDb(sstable_page.data_, level_, run_);
   sstable_page.GetMemtable(filter, memtable);
 }
 

@@ -28,9 +28,9 @@ SSTableManager::SSTableManager(DiskManager *disk_manager) :
   levels_(vector<unique_ptr<Level>>(MAX_LEVEL_NUM)) {}
 
 /*
- * Merge down policy:
- * (1) Search from bottom to top
- * (2) Search from left to right
+ * Policy for dumping SSTable:
+ * (1) search from bottom level to topmost
+ * (2) search from left-most run to right-most 
  *
  * @param[out] level_no: only meaningful when return true
  * @param[out] run_no: only meaningful when return true, -1 if level not allocated yet
@@ -41,7 +41,7 @@ bool SSTableManager::GetAvaiRun(int *level_no, int *run_no) const {
     if (levels_[idx] == nullptr) {
       *level_no = idx;
       *run_no = -1;
-      LOG_DEBUG("Could persist to empty level ", *level_no);
+      LOG_DEBUG("Could persist to level ", *level_no, ", run 0");
       return true;
     }
     int avai_run = levels_[idx]->GetAvaiRun();
@@ -79,7 +79,7 @@ void SSTableManager::DumpSSTable(int level_no, int run_no, const memtable_t& mem
 
 // Leverage Run::DumpSSTable infrastructure to decode memtable, thus use
 // level=MAX_LEVEL_NUM-1, run=0, which is guarenteed to exist.
-void SSTableManager::DumpTempSSTable(const vector<pair<Key, Val>>& memtable) {
+void SSTableManager::DumpTempSSTable(const memtable_t& memtable) {
   levels_[MAX_LEVEL_NUM - 1]->DumpSSTable(0 /* run */, memtable);
 }
 

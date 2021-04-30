@@ -26,7 +26,7 @@ namespace ghostdb {
 void SingleThreadTest() {
   // max key-value pairs without compaction: 160
   unique_ptr<GhostDB> db = make_unique<GhostDB>();
-  for (Key key = 0; key < 161; ++key) {
+  for (Key key = 0; key < 75; ++key) {
     Val val = key;
     assert(db->Put(key, val));
   }

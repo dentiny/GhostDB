@@ -34,6 +34,7 @@ CompactionManager::CompactionManager(SSTableManager *sstable_manager) :
 }
 
 CompactionManager::~CompactionManager() {
+  LOG_DEBUG("CompactionManager::~CompactionManager");
   StopCompactionThread();
 }
 
@@ -110,7 +111,6 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
         is_run_avai = false;
         break;
       }
-      LOG_DEBUG("During compaction, load SSTable file level:", level_no, ", run:", run_no);
       Bloom bloom_filter;
       memtable_t sstable_kv;
       sstable_manager_->LoadSSTable(level_no, run_no, &bloom_filter, &sstable_kv);
@@ -129,6 +129,7 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
   sstable_manager_->DumpTempSSTable(memtable);
 
   // 3. Remove related pages within SSTable pages
+  LOG_DEBUG("During compaction, remove related pages within SSTable pages");
   is_run_avai = true;
   for (int level_no = start_level_no; is_run_avai && level_no >= 0; --level_no) {
     for (int run_no = 0; run_no < (level_no + 1) * MAX_RUN_PER_LEVEL; ++run_no) {
@@ -136,7 +137,6 @@ void CompactionManager::LaunchCompactionImpl(int start_level_no) {
         is_run_avai = false;
         break;
       }
-      LOG_DEBUG("During compaction, clear SSTable file level:", level_no, ", run:", run_no);
       sstable_manager_->ClearSSTable(level_no, run_no);
     }
   }

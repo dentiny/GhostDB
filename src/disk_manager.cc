@@ -34,7 +34,7 @@ void DiskManager::InitFileIOImpl(fstream *io, const string& filename) {
   io->open(filename, std::ios::binary | std::ios::trunc | std::ios::out);
   io->close();
   // reopen with original mode
-  io->open(filename, std::ios::binary | std::ios::in | std::ios::app | std::ios::out);
+  io->open(filename, std::ios::binary | std::ios::in | std::ios::out);
   if (!io->is_open()) {
     LOG_ERROR("cannot open db file:", filename);
   }
@@ -42,6 +42,7 @@ void DiskManager::InitFileIOImpl(fstream *io, const string& filename) {
 
 // TODO: remove WAL and temporary SSTable for recovery
 DiskManager::~DiskManager() {
+  LOG_DEBUG("DiskManager::~DiskManager");
   if (log_io_.is_open()) {
     log_io_.close();
   }
