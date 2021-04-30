@@ -10,6 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -119,6 +120,22 @@ int GetMaxRun(int level) {
 
 int GetRunIndex(int level, int run) {
   return level * (level + 1) * MAX_RUN_PER_LEVEL / 2 + run;
+}
+
+// TODO: could use binary search, or memorization to speed up
+bool GetLevelRunNo(int32_t page_id, int *level, int *run) {
+  assert(page_id < TOTAL_NON_OVERFLOW_PAGES);  // called only for non-overflow pages
+  for (int level_id = 0; level_id < MAX_LEVEL_NUM; ++level_id) {
+    int cur_max_run = GetMaxRun(level_id);
+    for (int run_id = 0; run_id < cur_max_run; ++run_id) {
+      if (GetRunIndex(level_id, run_id) == page_id) {
+        *level = level_id;
+        *run = run_id;
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 sstable_t MergeSSTable(const sstable_t& new_sstable, const sstable_t& old_sstable) {

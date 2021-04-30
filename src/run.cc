@@ -64,6 +64,11 @@ bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
   memmove(page_data + offset, &kv_num_, sizeof(kv_num_));
   offset += sizeof(kv_num_);
 
+  // Dump page id.
+  int32_t page_id = GetRunIndex(level_, run_);
+  memmove(page_data + offset, &page_id, sizeof(page_id));
+  offset += sizeof(page_id);
+
   // Dump bloom filter.
   // NOTE: Dump and load in the same format.
   // Specifically, bloom filter lives as 64-bit integers in files(cannot be dumped in the string format).
@@ -97,7 +102,9 @@ void Run::LoadSSTable(Bloom *filter, sstable_t *memtable) {
   assert(!is_empty_);
   SSTablePage sstable_page;
   disk_manager_->ReadDb(sstable_page.data_, level_, run_);
-  sstable_page.GetMemtable(filter, memtable);
+  sstable_page.ParsePageData();
+  *filter = sstable_page.GetBloomFilter();
+  sstable_page.GetMemtable(memtable);
 }
 
 }  // namespace ghostdb

@@ -37,6 +37,7 @@ void RenameFile(const char *old_name, const char *new_name);
 // SSTable utils
 int GetMaxRun(int level);  // run # within given level
 int GetRunIndex(int level, int run);
+bool GetLevelRunNo(int page_id, int *level, int *run);
 sstable_t MergeSSTable(const sstable_t& new_sstable, const sstable_t& old_sstable);
 
 }  // namespace ghostdb

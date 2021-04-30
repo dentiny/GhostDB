@@ -12,14 +12,16 @@
 
 #include <cassert>
 
+#include "logger.h"
 #include "sstable_page.h"
+#include "util.h"
 
 namespace ghostdb {
 
 SSTablePage::SSTablePage() :
   kv_num_(-1) {}
 
-void SSTablePage::GetMemtable(Bloom *bloom_filter, sstable_t *memtable) {
+void SSTablePage::ParsePageData() {
   size_t offset = 0;
 
   // Read magic number and has_next_page.
@@ -31,6 +33,13 @@ void SSTablePage::GetMemtable(Bloom *bloom_filter, sstable_t *memtable) {
   // Read key-value pair counts.
   memmove(&kv_num_, data_ + offset, sizeof(kv_num_));
   offset += sizeof(kv_num_);
+
+  // Read page id(level and run #).
+  memmove(&page_id_, data_ + offset, sizeof(page_id_));
+  offset += sizeof(page_id_);
+  if (page_id_ < TOTAL_NON_OVERFLOW_PAGES) {
+    assert(GetLevelRunNo(page_id_, &level_, &run_));
+  }
 
   // Read bloom filter.
   uint64_t filter;  // FIXME: hard-code # of bits
@@ -49,10 +58,7 @@ void SSTablePage::GetMemtable(Bloom *bloom_filter, sstable_t *memtable) {
     offset += sizeof(val);
     memtable_.emplace_back(key, val);
   }
-  assert(kv_num_ == static_cast<int32_t>(memtable_.size()));
-
-  *bloom_filter = bloom_filter_;
-  memtable->swap(memtable_);
+  assert(kv_num_ == static_cast<int32_t>(memtable_.size()));  
 }
 
 }  // namespace ghostdb

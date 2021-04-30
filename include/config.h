@@ -46,6 +46,8 @@ static constexpr int MAX_RUN_PER_LEVEL = 1;
 static constexpr int MAX_BUFFER_SIZE = 5;
 /** # of biggest runs in a level, used to calculate sstable_id(reference common.h) */
 static constexpr int MAX_RUN_IN_LEVEL = MAX_LEVEL_NUM * MAX_RUN_PER_LEVEL;
+/** # of pages of non-overflow pages */
+static constexpr int TOTAL_NON_OVERFLOW_PAGES = (1 + MAX_LEVEL_NUM) * MAX_LEVEL_NUM * MAX_RUN_PER_LEVEL / 2;
 /** # of all possible runs, used to fix the size of ClockReplacer */
 static constexpr int SSTABLE_NUM = MAX_RUN_IN_LEVEL * MAX_LEVEL_NUM;
 /** # of kv pairs in WAL buffer, used to flush WAL into disk periodically */
