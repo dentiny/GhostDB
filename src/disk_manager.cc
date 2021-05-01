@@ -46,7 +46,6 @@ void DiskManager::InitFileIOImpl(fstream *io, const string& filename) {
   }
 }
 
-// TODO: remove WAL and temporary SSTable for recovery
 DiskManager::~DiskManager() {
   LOG_DEBUG("DiskManager::~DiskManager");
   if (log_io_.is_open()) {
