@@ -33,8 +33,9 @@ class Buffer {
   explicit Buffer(uint32_t buffer_size, DiskManager *disk_manager);
   bool Put(Key key, Val val);
   bool Get(Key key, Val **val);
+  void GetRange(Key key1, Key key2, buffer_t *res);  // inclusive
   void ClearKV() { kv_.clear(); }
-  void FlushWAL();
+  void FlushWAL() { log_manager_->Flush(); }
 
  private:
   uint32_t buffer_size_;

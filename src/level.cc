@@ -68,9 +68,13 @@ bool Level::DumpSSTable(int run_no, const Cont& memtable, bool for_temp_table) {
 template bool Level::DumpSSTable(int run_no, const sstable_t& memtable, bool for_temp_table);
 template bool Level::DumpSSTable(int run_no, const buffer_t& memtable, bool for_temp_table);
 
-void Level::LoadSSTable(int run_no, Bloom *filter, sstable_t *memtable) {
-  assert(!runs_[run_no]->IsEmpty());
+// @return: true for SSTable file exists
+bool Level::LoadSSTable(int run_no, Bloom *filter, sstable_t *memtable) {
+  if (runs_[run_no]->IsEmpty()) {
+    return false;
+  }
   runs_[run_no]->LoadSSTable(filter, memtable);
+  return true;
 }
 
 bool Level::IsEmpty(int run_no) const {

@@ -52,8 +52,23 @@ bool Buffer::Get(Key key, Val **val) {
   return false;
 }
 
-void Buffer::FlushWAL() {
-  log_manager_->Flush();
+void Buffer::GetRange(Key key1, Key key2, buffer_t *res) {
+  assert(key1 <= key2);
+  const auto& kv1 = *kv_.begin();
+  const auto& kv2 = *kv_.rbegin();
+  if (kv1.first > key2 || kv2.first < key1) {
+    return;
+  }
+  auto it1 = kv_.lower_bound(key1);
+  auto it2 = kv_.lower_bound(key2);
+  if (it2 != kv_.end()) {
+    ++it2;
+  }
+  for (auto it = it1; it != it2; ++it) {
+    Key key = it->first;
+    Val val = it->second;
+    (*res)[key] = val;
+  }
 }
 
 }  // namespace ghostdb

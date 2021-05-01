@@ -47,14 +47,17 @@ Run::Run(int level, int run, DiskManager *disk_manager) :
 
 void Run::ClearSSTable() {
   assert(!is_empty_);
+  rwlatch_.WLock();
   is_empty_ = true;
   disk_manager_->WriteDb(zero_data, PAGE_SIZE, GetPageId(level_, run_));
+  rwlatch_.WUnlock();
 }
 
 // About page layout, reference to: page.h
 // TODO: currently don't consider the situation memtable demands more than one page, set has_next_page = 0
 template<typename Cont>
 bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
+  rwlatch_.WLock();
   is_empty_ = false;
   size_t offset = 0;
   char page_data[PAGE_SIZE] = { 0 };
@@ -95,6 +98,7 @@ bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
   } else {
     disk_manager_->WriteDb(page_data, PAGE_SIZE, GetPageId(level_, run_));
   }
+  rwlatch_.WUnlock();
   return true;
 }
 
@@ -102,13 +106,19 @@ bool Run::DumpSSTable(const Cont& memtable, bool for_temp_table) {
 template bool Run::DumpSSTable(const sstable_t& memtable, bool for_temp_table);
 template bool Run::DumpSSTable(const buffer_t& memtable, bool for_temp_table);
 
-void Run::LoadSSTable(Bloom *filter, sstable_t *memtable) {
-  assert(!is_empty_);
+bool Run::LoadSSTable(Bloom *filter, sstable_t *memtable) {
+  rwlatch_.RLock();
+  if (is_empty_) {
+    rwlatch_.RUnlock();
+    return true;
+  }
   SSTablePage sstable_page;
   disk_manager_->ReadDb(sstable_page.data_, GetPageId(level_, run_));
   sstable_page.ParsePageData();
   *filter = sstable_page.GetBloomFilter();
   sstable_page.GetMemtable(memtable);
+  rwlatch_.RUnlock();
+  return true;
 }
 
 }  // namespace ghostdb

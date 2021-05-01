@@ -76,8 +76,9 @@ void SSTableManager::DumpTempSSTable(const sstable_t& memtable) {
   levels_[MAX_LEVEL_NUM - 1]->DumpSSTable(0 /* run */, memtable, true /* for_temp_table */);
 }
 
-void SSTableManager::LoadSSTable(int level_no, int run_no, Bloom *filter, sstable_t *memtable) {
-  levels_[level_no]->LoadSSTable(run_no, filter, memtable);
+// @return: true for SSTable file exists
+bool SSTableManager::LoadSSTable(int level_no, int run_no, Bloom *filter, sstable_t *memtable) {
+  return levels_[level_no]->LoadSSTable(run_no, filter, memtable);
 }
 
 void SSTableManager::ClearTempSSTable() {

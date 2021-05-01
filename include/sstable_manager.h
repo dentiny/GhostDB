@@ -33,7 +33,7 @@ class SSTableManager {
   bool DumpSSTable(const buffer_t& memtable);
   void DumpSSTable(int level, int run, const sstable_t& memtable);
   void DumpTempSSTable(const sstable_t& memtable);
-  void LoadSSTable(int level_no, int run_no, Bloom *filter, sstable_t *memtable);
+  bool LoadSSTable(int level_no, int run_no, Bloom *filter, sstable_t *memtable);
   bool IsEmpty(int level_no, int run_no) const;
 
  private:

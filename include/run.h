@@ -21,6 +21,7 @@
 #include "common.h"
 #include "disk_manager.h"
 #include "page.h"
+#include "rwlatch.h"
 
 namespace ghostdb {
 
@@ -31,7 +32,7 @@ class Run {
   void ClearSSTable();
   template<typename Cont>
   bool DumpSSTable(const Cont& memtable, bool for_temp_table);
-  void LoadSSTable(Bloom *filter, sstable_t *memtable);
+  bool LoadSSTable(Bloom *filter, sstable_t *memtable);
 
  private:
   int level_;
@@ -39,6 +40,7 @@ class Run {
   bool is_empty_;  // whether there's corresponding SSTable
   int32_t kv_num_;  // # of key-value pairs in the SSTable
   Bloom bloom_filter_;
+  ReaderWriterLatch rwlatch_;
   DiskManager *disk_manager_;
 };
 

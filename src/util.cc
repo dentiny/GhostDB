@@ -72,7 +72,6 @@ string GetFilename(int level, int run) {
 bool IsPageAllZero(const char *page_data) {
   for (int idx = 0; idx < PAGE_SIZE; ++idx) {
     if (page_data[idx] != 0) {
-      LOG_DEBUG("index:", idx, " is not zero");
       return false;
     }
   }

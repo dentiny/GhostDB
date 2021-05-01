@@ -41,6 +41,7 @@ class GhostDB {
   ~GhostDB() noexcept;
   bool Put(Key key, Val val);
   bool Get(Key key, Val *val);
+  void GetRange(Key key1, Key key2, buffer_t *res);  // inclusive
   bool Delete(Key key);
 
  private:

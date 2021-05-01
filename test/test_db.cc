@@ -30,6 +30,15 @@ void SingleThreadTest() {
     Val val = key;
     assert(db->Put(key, val));
   }
+  for (Key key = 0; key < 75; ++key) {
+    Val expected = key;
+    Val val;
+    assert(db->Get(key, &val));
+    assert(val == expected);
+  }
+  buffer_t res;
+  db->GetRange(30, 59, &res);
+  assert(res.size() == 30);
 }
 
 }  // namespace ghostdb
