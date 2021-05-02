@@ -1,11 +1,19 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary")
 
 cc_library(
-    name = "ghostdb",
-    srcs = glob(["src/*.cc"]),
-    hdrs = glob(["include/*.h"]),
-    linkopts = ["-pthread"],
-    copts = ["-Iinclude"],
+  name = "ghostdb",
+  srcs = glob(["src/*.cc"]),
+  hdrs = glob(["include/*.h"]),
+  linkopts = ["-pthread"],
+  copts = ["-Iinclude"],
+)
+
+cc_binary(
+  name = "testdb",
+  srcs = ["test/test_db.cc"],
+  linkopts = ["-pthread"],
+  copts = ["-Iinclude"],
+  deps = [":ghostdb"],
 )
 
 # compile option: bazel build --cxxopt="-std=c++17" --cxxopt="-g3" --cxxopt="-Werror" --cxxopt="-Wall" --cxxopt="-pedantic" --cxxopt="-Wconversion" --cxxopt="-Wformat" ghostdb
