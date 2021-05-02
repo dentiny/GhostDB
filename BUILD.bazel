@@ -20,10 +20,17 @@ cc_library(
 cc_binary(
   name = "testdb",
   srcs = ["test/test_db.cc"],
-  linkopts = ["-pthread"],
+  linkopts = [
+    "-pthread",
+    "-L/usr/local/lib",
+    "-lgtest",
+    "-lgtest_main"
+    ],
   deps = [":ghostdb"],
   copts = [
     "-Iinclude",
+    "-I/usr/local/include",
+    "-L/usr/local/lib",
     "-std=c++17",
     "-Wall",
     "-Werror",
@@ -33,5 +40,3 @@ cc_binary(
     "-g3"
     ],
 )
-
-# compile option: bazel build --cxxopt="-std=c++17" --cxxopt="-g3" --cxxopt="-Werror" --cxxopt="-Wall" --cxxopt="-pedantic" --cxxopt="-Wconversion" --cxxopt="-Wformat" ghostdb

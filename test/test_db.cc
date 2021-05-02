@@ -10,40 +10,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <cassert>
-#include <cstdint>
-#include <cstdlib>
 #include <memory>
+#include <gtest/gtest.h>
 
 #include "common.h"
 #include "db.h"
 
-using std::make_unique;
-using std::unique_ptr;
+using namespace ghostdb;
+using namespace std;
 
-namespace ghostdb {
-
-void SingleThreadTest() {
+TEST(SingleThreadTest, SimpleTest) {
   // max key-value pairs without compaction: 160
   unique_ptr<GhostDB> db = make_unique<GhostDB>();
   for (Key key = 0; key < 75; ++key) {
     Val val = key;
-    assert(db->Put(key, val));
+    EXPECT_TRUE(db->Put(key, val));
   }
   for (Key key = 0; key < 75; ++key) {
     Val expected = key;
     Val val;
-    assert(db->Get(key, &val));
-    assert(val == expected);
+    EXPECT_TRUE(db->Get(key, &val));
+    EXPECT_EQ(val, expected);
   }
   buffer_t res;
   db->GetRange(30, 59, &res);
-  assert(res.size() == 30);
+  EXPECT_EQ(res.size(), 30);
 }
 
-}  // namespace ghostdb
-
 int main(int argc, char **argv) {
-  ghostdb::SingleThreadTest();
-  return EXIT_SUCCESS;
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

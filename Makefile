@@ -26,7 +26,7 @@ OBJS     = $(BUILD)/bloom.o                \
 all: $(BUILD)/test_db
 
 $(BUILD)/test_db: $(TEST)/test_db.cc $(LIB)
-	$(CC) $(CFLAGS) -pthread -I $(INC) -L $(BUILD) $^ -o $@
+	$(CC) $< $(CFLAGS) -lgtest -lgtest_main -pthread -I $(INC) $(LIB) -o $@
 
 $(LIB): $(OBJS)
 	ar -rc $@ $^
@@ -68,4 +68,4 @@ $(BUILD)/db.o: $(SRC)/db.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
 clean:
-	rm $(BUILD)/*
+	rm -rf $(BUILD)/*
