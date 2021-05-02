@@ -5,15 +5,33 @@ cc_library(
   srcs = glob(["src/*.cc"]),
   hdrs = glob(["include/*.h"]),
   linkopts = ["-pthread"],
-  copts = ["-Iinclude"],
+  copts = [
+    "-Iinclude",
+    "-std=c++17",
+    "-Wall",
+    "-Werror",
+    "-pedantic",
+    "-Wconversion",
+    "-Wformat",
+    "-g3"
+    ],
 )
 
 cc_binary(
   name = "testdb",
   srcs = ["test/test_db.cc"],
   linkopts = ["-pthread"],
-  copts = ["-Iinclude"],
   deps = [":ghostdb"],
+  copts = [
+    "-Iinclude",
+    "-std=c++17",
+    "-Wall",
+    "-Werror",
+    "-pedantic",
+    "-Wconversion",
+    "-Wformat",
+    "-g3"
+    ],
 )
 
 # compile option: bazel build --cxxopt="-std=c++17" --cxxopt="-g3" --cxxopt="-Werror" --cxxopt="-Wall" --cxxopt="-pedantic" --cxxopt="-Wconversion" --cxxopt="-Wformat" ghostdb
