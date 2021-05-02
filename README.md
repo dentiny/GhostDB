@@ -40,4 +40,4 @@ db->GetRange(30 /* key1 */, 59 /* key2 */, &res);
   + Allow new page allocated if currently SSTable page exhausted
   + RecoveryManager load multiple WAL and temporary SSTable pages
 - [ ] concurrent access to GhostDB
-- [ ] more detailed unit tests
+- [ ] more thorough unit tests

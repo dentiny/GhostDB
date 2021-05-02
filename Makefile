@@ -9,6 +9,7 @@ INCLUDES = $(INC)/*.h
 SRC      = $(CUR_DIR)/src
 TEST     = $(CUR_DIR)/test
 BUILD    = $(CUR_DIR)/build
+LIB      = $(BUILD)/libghostdb.a
 OBJS     = $(BUILD)/bloom.o                \
            $(BUILD)/buffer.o               \
            $(BUILD)/compaction_manager.o   \
@@ -22,10 +23,13 @@ OBJS     = $(BUILD)/bloom.o                \
 					 $(BUILD)/sstable_page.o         \
 					 $(BUILD)/util.o
 
-all: $(OBJS) $(BUILD)/test_db
+all: $(BUILD)/test_db
 
-$(BUILD)/test_db: $(TEST)/test_db.cc $(OBJS)
-	$(CC) $(CFLAGS) -pthread -I $(INC) $^ -o $@
+$(BUILD)/test_db: $(TEST)/test_db.cc $(LIB)
+	$(CC) $(CFLAGS) -pthread -I $(INC) -L $(BUILD) $^ -o $@
+
+$(LIB): $(OBJS)
+	ar -rc $@ $^
 
 $(BUILD)/util.o: $(SRC)/util.cc $(INCLUDES)
 	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
