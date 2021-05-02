@@ -34,7 +34,7 @@ db->GetRange(30 /* key1 */, 59 /* key2 */, &res);
 
 ### Checklist
 
-- [ ] Update build system to CMakeLists and Bazel.
+- [x] Update build system to CMakeLists and Bazel.
 - [ ] buffer pool manager
   + NewPage, DeallocatePage, PinPage, UnpinPage
   + Allow new page allocated if currently SSTable page exhausted
