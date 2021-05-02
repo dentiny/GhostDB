@@ -1,0 +1,11 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "ghostdb",
+    srcs = glob(["src/*.cc"]),
+    hdrs = glob(["include/*.h"]),
+    linkopts = ["-pthread"],
+    copts = ["-Iinclude"],
+)
+
+# compile option: bazel build --cxxopt="-std=c++17" --cxxopt="-g3" --cxxopt="-Werror" --cxxopt="-Wall" --cxxopt="-pedantic" --cxxopt="-Wconversion" --cxxopt="-Wformat" ghostdb

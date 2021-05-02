@@ -267,3 +267,6 @@ src/*.o
 # Memtable WAL and SSTable
 src/*.log
 src/*.db
+
+# bazel related output
+bazel-*
