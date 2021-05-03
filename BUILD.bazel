@@ -22,7 +22,7 @@ cc_binary(
   srcs = ["test/test_db.cc"],
   linkopts = [
     "-pthread",
-    "-L/usr/local/lib",
+    "-L/usr/local/lib", # https://stackoverflow.com/questions/65675412/bazel-build-cannot-find-shared-library
     "-lgtest",
     "-lgtest_main"
     ],
